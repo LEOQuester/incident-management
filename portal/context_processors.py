@@ -9,13 +9,13 @@ def navigation(request):
 
     user = request.user
     if user.is_superuser:
-        perms = Permission.objects.exclude(url_name="").order_by("menu_order", "name")
+        perms = Permission.objects.exclude(url_name="").order_by("name")
     else:
         perms = (
             Permission.objects.filter(roles__users=user)
             .exclude(url_name="")
             .distinct()
-            .order_by("menu_order", "name")
+            .order_by("name")
         )
 
     sidebar_items = []

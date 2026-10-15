@@ -14,10 +14,9 @@ class Permission(models.Model):
     )
     menu_label = models.CharField(max_length=100, blank=True)
     menu_icon = models.CharField(max_length=50, blank=True, default="fa-circle")
-    menu_order = models.PositiveIntegerField(default=100)
 
     class Meta:
-        ordering = ["menu_order", "name"]
+        ordering = ["name"]
 
     def __str__(self) -> str:
         return self.name

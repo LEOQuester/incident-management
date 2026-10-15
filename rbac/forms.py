@@ -14,7 +14,6 @@ class PermissionForm(forms.ModelForm):
             "url_name",
             "menu_label",
             "menu_icon",
-            "menu_order",
         )
         widgets = {
             "codename": forms.TextInput(attrs={"class": "form-control"}),
@@ -23,7 +22,6 @@ class PermissionForm(forms.ModelForm):
             "url_name": forms.TextInput(attrs={"class": "form-control"}),
             "menu_label": forms.TextInput(attrs={"class": "form-control"}),
             "menu_icon": forms.TextInput(attrs={"class": "form-control"}),
-            "menu_order": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
 

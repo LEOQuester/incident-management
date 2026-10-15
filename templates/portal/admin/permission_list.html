@@ -10,7 +10,6 @@
         <th>Codename</th>
         <th>Name</th>
         <th>URL name</th>
-        <th>Menu order</th>
         <th></th>
       </tr>
     </thead>
@@ -20,7 +19,6 @@
         <td><code>{{ perm.codename }}</code></td>
         <td>{{ perm.name }}</td>
         <td>{{ perm.url_name|default:"—" }}</td>
-        <td>{{ perm.menu_order }}</td>
         <td class="actions">
           <a href="{% url 'portal:permission_edit' perm.pk %}">Edit</a>
           <a href="{% url 'portal:permission_delete' perm.pk %}" class="danger">Delete</a>

@@ -11,7 +11,6 @@ DEFAULT_PERMISSIONS = [
         "url_name": "portal:dashboard",
         "menu_label": "Dashboard",
         "menu_icon": "fa-home",
-        "menu_order": 10,
     },
     {
         "codename": "report_incident",
@@ -20,7 +19,6 @@ DEFAULT_PERMISSIONS = [
         "url_name": "incidents:report",
         "menu_label": "Report Incident",
         "menu_icon": "fa-triangle-exclamation",
-        "menu_order": 20,
     },
 ]
 
