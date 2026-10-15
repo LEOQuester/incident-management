@@ -320,6 +320,43 @@ a {
   max-width: 480px;
 }
 
+.auth-panel-register {
+  max-width: 920px;
+}
+
+.register-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.register-form-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form-full {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .register-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.5rem;
+    row-gap: 0;
+  }
+
+  .register-form-full {
+    grid-column: 1 / -1;
+  }
+
+  .register-form-full.form-actions {
+    margin-top: 0.5rem;
+    justify-content: flex-start;
+  }
+}
+
 .auth-brand {
   text-align: center;
   color: #fff;
