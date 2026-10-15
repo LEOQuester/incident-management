@@ -1,0 +1,29 @@
+{% extends "base_app.html" %}
+{% block content %}
+{% if notifications %}
+<form method="post" class="toolbar">
+  {% csrf_token %}
+  <button type="submit" name="mark_all_read" class="btn btn-secondary btn-sm">Mark all read</button>
+</form>
+<div class="notification-list">
+  {% for note in notifications %}
+  <article class="notification-item {% if not note.is_read %}unread{% endif %}">
+    <div class="notification-body">
+      <p>{{ note.message }}</p>
+      <time>{{ note.created_at }}</time>
+    </div>
+    {% if not note.is_read %}
+    <form method="post" action="{% url 'incidents:notification_mark_read' note.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline btn-sm">Mark read</button>
+    </form>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <p class="text-muted">No notifications yet.</p>
+</div>
+{% endif %}
+{% endblock %}

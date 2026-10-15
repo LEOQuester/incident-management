@@ -368,6 +368,131 @@ a {
   width: 100%;
 }
 
+.notification-bell {
+  position: relative;
+  color: #fff;
+  font-size: 1.1rem;
+  margin-right: 0.25rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #bd584e;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--fmsc-muted);
+  margin-top: 0.25rem;
+}
+
+.photo-uploader {
+  margin-top: 0.5rem;
+}
+
+.photo-dropzone {
+  border: 2px dashed #c5d9cc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  background: #f8fcf9;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.photo-dropzone.dragover {
+  border-color: var(--fmsc-green);
+  background: #eef9f2;
+}
+
+.photo-dropzone i {
+  font-size: 2rem;
+  color: var(--fmsc-green);
+  margin-bottom: 0.5rem;
+}
+
+.photo-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.photo-preview-item {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--fmsc-border);
+}
+
+.photo-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #fff;
+  border: 1px solid var(--fmsc-border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+}
+
+.notification-item.unread {
+  border-left: 4px solid var(--fmsc-green);
+}
+
+.notification-item time {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--fmsc-muted);
+  margin-top: 0.35rem;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--fmsc-green);
+  color: var(--fmsc-green-dark);
+}
+
 @media (max-width: 900px) {
   .layout {
     flex-direction: column;

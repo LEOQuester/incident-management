@@ -8,6 +8,20 @@ class User(AbstractUser):
 
     email = models.EmailField("email address", blank=True, unique=True, null=True)
     phone = PhoneNumberField(unique=True, blank=True, null=True)
+    mc_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="Management Club number, e.g. mc112202",
+    )
+    cpm_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="CPM number, e.g. cpm25666",
+    )
     roles = models.ManyToManyField(
         "rbac.Role",
         related_name="users",

@@ -1,0 +1,51 @@
+{% extends "base_app.html" %}
+{% load static %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="card form-card" id="incident-form">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-error">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="form-group">
+    <label for="{{ form.description.id_for_label }}">Incident description</label>
+    {{ form.description }}
+    <div class="char-counter">
+      <span id="desc-count">0</span> / {{ max_description }} characters
+    </div>
+    {{ form.description.errors }}
+  </div>
+
+  <div class="form-group">
+    <label>Photos <span class="text-muted">(optional, max {{ max_photos }})</span></label>
+    <div class="photo-uploader" id="photo-uploader" data-max="{{ max_photos }}">
+      <div class="photo-dropzone" id="photo-dropzone">
+        <i class="fa fa-cloud-arrow-up"></i>
+        <p>Drag & drop images here or click + to add</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="photo-add-btn">
+          <i class="fa fa-plus"></i> Add photo
+        </button>
+      </div>
+      <input type="file" name="photos" id="photo-input" accept="image/*" multiple hidden>
+      <div class="photo-preview-grid" id="photo-preview-grid"></div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Submit incident</button>
+  </div>
+</form>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/incident-uploader.js' %}"></script>
+<script>
+(function () {
+  var ta = document.querySelector('.incident-description');
+  var counter = document.getElementById('desc-count');
+  if (!ta || !counter) return;
+  function sync() { counter.textContent = ta.value.length; }
+  ta.addEventListener('input', sync);
+  sync();
+})();
+</script>
+{% endblock %}
