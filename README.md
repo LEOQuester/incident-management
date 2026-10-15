@@ -22,6 +22,8 @@ cp .env.example .env
 python manage.py migrate
 python manage.py seed_rbac
 python manage.py createsuperuser
+# Or set DJANGO_SUPERUSER_USERNAME / DJANGO_SUPERUSER_PASSWORD / DJANGO_SUPERUSER_EMAIL in .env and run:
+python manage.py ensure_superuser
 python manage.py runserver
 ```
 
@@ -36,6 +38,7 @@ Visit `http://127.0.0.1:8000/accounts/login/`.
    - `DJANGO_DEBUG=False`
    - `DJANGO_CSRF_TRUSTED_ORIGINS=https://YOUR-DOMAIN.up.railway.app` (your generated URL)
    - `GEMINI_API_KEY` (optional until you use AI routing)
+   - `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`, `DJANGO_SUPERUSER_EMAIL` — creates/resets admin on deploy (remove password var after first login)
 4. Redeploy. The app auto-adds `RAILWAY_PUBLIC_DOMAIN` to `ALLOWED_HOSTS` when Railway provides it.
 5. Health check: `GET /health/` should return `{"status": "ok"}`.
 

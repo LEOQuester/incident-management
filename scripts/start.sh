@@ -9,6 +9,9 @@ python manage.py migrate --noinput
 echo "Seeding RBAC defaults..."
 python manage.py seed_rbac
 
+echo "Ensuring superuser (if env vars set)..."
+python manage.py ensure_superuser
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
