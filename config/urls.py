@@ -1,15 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 from django.conf.urls.static import static
 from django.http import JsonResponse
->>>>>>> 68176b5 (Fix Railway deploy: ALLOWED_HOSTS, health check, start script)
-=======
-from django.conf.urls.static import static
-from django.http import JsonResponse
->>>>>>> origin/cursor/incident-report-gemini-4945
 from django.shortcuts import redirect
 from django.urls import include, path
 
