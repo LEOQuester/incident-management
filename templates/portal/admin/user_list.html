@@ -1,0 +1,41 @@
+{% extends "base_app.html" %}
+{% block content %}
+<div class="toolbar">
+  <a href="{% url 'portal:user_create' %}" class="btn btn-primary">New User</a>
+</div>
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Roles</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.username }}{% if u.is_superuser %} <span class="badge badge-accent">SU</span>{% endif %}</td>
+        <td>{{ u.get_display_name }}</td>
+        <td>{{ u.email|default:"—" }}</td>
+        <td>{{ u.phone|default:"—" }}</td>
+        <td>
+          {% for role in u.roles.all %}
+          <span class="badge">{{ role.name }}</span>
+          {% empty %}—{% endfor %}
+        </td>
+        <td class="actions">
+          <a href="{% url 'portal:user_edit' u.pk %}">Edit</a>
+          <a href="{% url 'portal:user_delete' u.pk %}" class="danger">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">No users yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base_app.html" %}
+{% block content %}
+<div class="card">
+  <p>Welcome, <strong>{{ user.get_display_name }}</strong>.</p>
+  <p>This is the FMSC Incident Management dashboard. Incident features will be added here based on your role permissions.</p>
+  {% if user.is_superuser %}
+  <p class="text-muted">As superuser, use the <strong>Super Admin</strong> section in the sidebar to manage permissions, roles, and users.</p>
+  {% endif %}
+</div>
+{% endblock %}

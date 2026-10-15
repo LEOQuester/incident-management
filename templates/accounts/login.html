@@ -1,0 +1,24 @@
+{% extends "base_auth.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h2>Sign in</h2>
+<p class="text-muted">Use your email, phone number, or username.</p>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-error">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <div class="form-group">
+    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+    {{ form.username }}
+    {{ form.username.errors }}
+  </div>
+  <div class="form-group">
+    <label for="{{ form.password.id_for_label }}">Password</label>
+    {{ form.password }}
+    {{ form.password.errors }}
+  </div>
+  <button type="submit" class="btn btn-primary btn-block">Login</button>
+</form>
+<p class="auth-footer">No account? <a href="{% url 'accounts:register' %}">Register</a></p>
+{% endblock %}

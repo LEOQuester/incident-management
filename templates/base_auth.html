@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block body_class %}auth-shell{% endblock %}
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-panel">
+    <div class="auth-brand">
+      <h1>Faculty of Management Studies and Commerce</h1>
+      <p>University of Sri Jayewardenepura</p>
+      <span class="auth-tag">Incident Management Portal</span>
+    </div>
+    <div class="auth-card">
+      {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

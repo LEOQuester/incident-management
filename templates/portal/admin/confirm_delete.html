@@ -1,0 +1,13 @@
+{% extends "base_app.html" %}
+{% block content %}
+<div class="card">
+  <p>Are you sure you want to delete <strong>{{ object }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">Delete</button>
+      <a href="{% url cancel_url %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

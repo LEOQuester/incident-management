@@ -1,0 +1,35 @@
+{% extends "base_app.html" %}
+{% block content %}
+<div class="toolbar">
+  <a href="{% url 'portal:role_create' %}" class="btn btn-primary">New Role</a>
+</div>
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Permissions</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for role in roles %}
+      <tr>
+        <td>{{ role.name }}</td>
+        <td>
+          {% for perm in role.permissions.all %}
+          <span class="badge">{{ perm.codename }}</span>
+          {% empty %}—{% endfor %}
+        </td>
+        <td class="actions">
+          <a href="{% url 'portal:role_edit' role.pk %}">Edit</a>
+          <a href="{% url 'portal:role_delete' role.pk %}" class="danger">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No roles yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

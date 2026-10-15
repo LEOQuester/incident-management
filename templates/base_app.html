@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block body_class %}app-shell{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="brand-mark">FMSC</span>
+    <span class="brand-text">Incident Management</span>
+  </div>
+  <div class="topbar-user">
+    <span class="user-name"><i class="fa fa-user-circle"></i> {{ user.get_display_name }}</span>
+    <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+    </form>
+  </div>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <p class="sidebar-heading">Menu</p>
+      <nav>
+        <ul class="sidebar-nav">
+          {% for item in sidebar_items %}
+          <li>
+            <a href="{{ item.url }}" class="sidebar-link">
+              <i class="fa {{ item.icon }}"></i> {{ item.label }}
+            </a>
+          </li>
+          {% empty %}
+          <li class="sidebar-empty">No pages assigned to your role yet.</li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+    {% if admin_sidebar_items %}
+    <div class="sidebar-section sidebar-admin">
+      <p class="sidebar-heading">Super Admin</p>
+      <nav>
+        <ul class="sidebar-nav">
+          {% for item in admin_sidebar_items %}
+          <li>
+            <a href="{{ item.url }}" class="sidebar-link">
+              <i class="fa {{ item.icon }}"></i> {{ item.label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </aside>
+  <main class="main-content">
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="page-header">
+      <h1>{{ page_title }}</h1>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
