@@ -39,7 +39,12 @@ Visit `http://127.0.0.1:8000/accounts/login/`.
 4. Redeploy. The app auto-adds `RAILWAY_PUBLIC_DOMAIN` to `ALLOWED_HOSTS` when Railway provides it.
 5. Health check: `GET /health/` should return `{"status": "ok"}`.
 
-If you see **Application failed to respond** while Gunicorn logs look fine, it is usually **wrong `ALLOWED_HOSTS`** (fixed by the Railway domain auto-config above) or **no public domain** generated on the service.
+If you see **Application failed to respond** while Gunicorn logs look fine:
+
+1. **Networking** → confirm a **public domain** is generated for the **web** service (not only Postgres).
+2. **Variables** → web service must reference **`DATABASE_URL`** from the Postgres plugin.
+3. Open **`/health/`** first; it should return `{"status": "ok"}` even before login works.
+4. In service **Settings**, ensure the HTTP proxy targets the same port Gunicorn logs show (usually **`$PORT`**, often `8080`).
 
 ## Default data
 

@@ -38,9 +38,18 @@ if _railway_domain:
         CSRF_TRUSTED_ORIGINS.append(_origin)
 
 if os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("RAILWAY_PROJECT_ID"):
-    for host in (".railway.app", ".up.railway.app"):
+    for host in (
+        "localhost",
+        "127.0.0.1",
+        ".railway.app",
+        ".up.railway.app",
+        ".railway.internal",
+    ):
         if host not in ALLOWED_HOSTS:
             ALLOWED_HOSTS.append(host)
+    # Behind Railway's edge proxy; avoids DisallowedHost for odd probe Host headers.
+    if "*" not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append("*")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -57,6 +66,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "config.middleware.EarlyHealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -90,11 +100,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
+    _ssl_default = "false" if os.environ.get("RAILWAY_ENVIRONMENT") else "true"
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=os.environ.get("DATABASE_SSL", "true").lower()
+            ssl_require=os.environ.get("DATABASE_SSL", _ssl_default).lower()
             in ("1", "true", "yes"),
         )
     }
