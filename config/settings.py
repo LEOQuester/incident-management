@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "accounts",
     "rbac",
     "portal",
+    "incidents",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "portal.context_processors.navigation",
+                "incidents.context_processors.notifications",
             ],
         },
     },
@@ -143,3 +145,19 @@ PHONENUMBER_DEFAULT_REGION = "LK"
 PHONENUMBER_DB_FORMAT = "E164"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+
+INCIDENT_DESCRIPTION_MAX_LENGTH = 2000
+INCIDENT_MAX_PHOTOS = 5
+INCIDENT_PHOTO_MAX_BYTES = 5 * 1024 * 1024
+INCIDENT_ALLOWED_IMAGE_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+}

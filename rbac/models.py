@@ -30,6 +30,10 @@ class Permission(models.Model):
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    is_end_user_role = models.BooleanField(
+        default=False,
+        help_text="End-user roles (e.g. Member) are excluded from AI incident routing.",
+    )
     permissions = models.ManyToManyField(
         Permission,
         related_name="roles",

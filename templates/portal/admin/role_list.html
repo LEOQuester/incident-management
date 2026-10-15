@@ -8,6 +8,7 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>End-user role</th>
         <th>Permissions</th>
         <th></th>
       </tr>
@@ -16,6 +17,7 @@
       {% for role in roles %}
       <tr>
         <td>{{ role.name }}</td>
+        <td>{% if role.is_end_user_role %}Yes{% else %}No{% endif %}</td>
         <td>
           {% for perm in role.permissions.all %}
           <span class="badge">{{ perm.codename }}</span>
@@ -27,7 +29,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="3">No roles yet.</td></tr>
+      <tr><td colspan="4">No roles yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

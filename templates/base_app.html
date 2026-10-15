@@ -7,6 +7,12 @@
     <span class="brand-text">Incident Management</span>
   </div>
   <div class="topbar-user">
+    <a href="{% url 'incidents:notifications' %}" class="notification-bell" title="Notifications">
+      <i class="fa fa-bell"></i>
+      {% if unread_notification_count %}
+      <span class="notification-badge">{{ unread_notification_count }}</span>
+      {% endif %}
+    </a>
     <span class="user-name"><i class="fa fa-user-circle"></i> {{ user.get_display_name }}</span>
     <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
       {% csrf_token %}

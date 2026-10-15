@@ -11,6 +11,8 @@
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
+        <th>MC</th>
+        <th>CPM</th>
         <th>Roles</th>
         <th></th>
       </tr>
@@ -22,6 +24,8 @@
         <td>{{ u.get_display_name }}</td>
         <td>{{ u.email|default:"—" }}</td>
         <td>{{ u.phone|default:"—" }}</td>
+        <td>{{ u.mc_number|default:"—" }}</td>
+        <td>{{ u.cpm_number|default:"—" }}</td>
         <td>
           {% for role in u.roles.all %}
           <span class="badge">{{ role.name }}</span>
@@ -33,7 +37,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="6">No users yet.</td></tr>
+      <tr><td colspan="8">No users yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
