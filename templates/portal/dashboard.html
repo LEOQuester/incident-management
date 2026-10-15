@@ -1,10 +1,55 @@
 {% extends "base_app.html" %}
 {% block content %}
-<div class="card">
+<div class="card dashboard-welcome">
   <p>Welcome, <strong>{{ user.get_display_name }}</strong>.</p>
-  <p>This is the FMSC Incident Management dashboard. Incident features will be added here based on your role permissions.</p>
-  {% if user.is_superuser %}
-  <p class="text-muted">As superuser, use the <strong>Super Admin</strong> section to manage roles and users. Menu pages are defined in application code.</p>
+  <p class="text-muted">
+    Incidents you submitted{% if not user.is_superuser %} or routed to your role{% endif %}{% if user.is_superuser %} and all system reports{% endif %} are listed below.
+  </p>
+  {% if can_report_incident %}
+  <p><a href="{% url 'incidents:report' %}" class="btn btn-primary btn-sm">Report new incident</a></p>
+  {% endif %}
+</div>
+
+<div class="card incident-list-card">
+  <h2 class="card-title">Submitted incidents</h2>
+
+  {% if incidents %}
+  <div class="table-wrap">
+    <table class="data-table incident-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          {% if user.is_superuser %}<th>Reporter</th>{% endif %}
+          <th>Summary</th>
+          <th>Photos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for incident in incidents %}
+        <tr>
+          <td><strong>#{{ incident.pk }}</strong></td>
+          <td>{{ incident.created_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            <span class="status-pill status-{{ incident.status }}">{{ incident.get_status_display }}</span>
+          </td>
+          {% if user.is_superuser %}
+          <td>{{ incident.reporter.get_display_name }}</td>
+          {% endif %}
+          <td class="incident-excerpt">{{ incident.description|truncatechars:80 }}</td>
+          <td>{{ incident.photos.count }}</td>
+          <td class="actions">
+            <a href="{% url 'incidents:detail' incident.pk %}">View details</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted empty-incidents">No incidents yet.{% if can_report_incident %} Use <strong>Report Incident</strong> to submit one.{% endif %}</p>
   {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base_app.html" %}
+{% block content %}
+<p class="back-link"><a href="{% url 'portal:dashboard' %}">&larr; Back to dashboard</a></p>
+
+<div class="card incident-detail">
+  <div class="incident-detail-header">
+    <h2>Incident #{{ incident.pk }}</h2>
+    <span class="status-pill status-{{ incident.status }}">{{ incident.get_status_display }}</span>
+  </div>
+
+  <dl class="incident-meta">
+    <div>
+      <dt>Submitted</dt>
+      <dd>{{ incident.created_at|date:"l, j F Y, H:i" }}</dd>
+    </div>
+    <div>
+      <dt>Reporter</dt>
+      <dd>{{ incident.reporter.get_display_name }} ({{ incident.reporter.username }})</dd>
+    </div>
+    {% if incident.alerted_roles.exists %}
+    <div>
+      <dt>Alerted roles</dt>
+      <dd>
+        {% for role in incident.alerted_roles.all %}
+        <span class="badge">{{ role.name }}</span>
+        {% endfor %}
+      </dd>
+    </div>
+    {% endif %}
+  </dl>
+
+  <div class="incident-description-block">
+    <h3>Description</h3>
+    <p class="incident-description-text">{{ incident.description }}</p>
+  </div>
+
+  {% if incident.photos.all %}
+  <div class="incident-photos-block">
+    <h3>Photos</h3>
+    <div class="incident-detail-photos">
+      {% for photo in incident.photos.all %}
+      <a href="{{ photo.image.url }}" target="_blank" rel="noopener" class="incident-photo-link">
+        <img src="{{ photo.image.url }}" alt="Incident photo {{ forloop.counter }}">
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

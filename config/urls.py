@@ -65,5 +65,6 @@ urlpatterns = [
     path("home/", root_redirect, name="home"),
 ]
 
-if settings.DEBUG:
+# Incident photos (use Railway volume or external storage for durable production media)
+if settings.DEBUG or os.environ.get("SERVE_MEDIA", "").lower() in ("1", "true", "yes"):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

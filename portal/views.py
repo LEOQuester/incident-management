@@ -6,16 +6,26 @@ from accounts.forms import AdminUserForm
 from accounts.models import User
 from rbac.decorators import permission_required, superuser_required
 from rbac.forms import RoleForm
+from incidents.access import incidents_queryset_for_user
 from rbac.models import Role
 
 
 @login_required
 @permission_required("view_dashboard")
 def dashboard(request):
+    incidents = (
+        incidents_queryset_for_user(request.user)
+        .select_related("reporter")
+        .prefetch_related("photos", "alerted_roles")[:50]
+    )
     return render(
         request,
         "portal/dashboard.html",
-        {"page_title": "Dashboard"},
+        {
+            "page_title": "Dashboard",
+            "incidents": incidents,
+            "can_report_incident": request.user.has_rbac_permission("report_incident"),
+        },
     )
 
 

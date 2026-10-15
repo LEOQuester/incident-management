@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from incidents.access import incidents_queryset_for_user, user_can_view_incident
 from incidents.forms import ReportIncidentForm, validate_incident_photos
 from incidents.models import Incident, IncidentPhoto, Notification
 from incidents.services.gemini_router import route_incident
@@ -44,7 +45,7 @@ def report_incident(request):
                     "Incident saved, but automatic routing could not run. "
                     "Staff will follow up manually.",
                 )
-            return redirect("incidents:report")
+            return redirect("incidents:detail", pk=incident.pk)
     else:
         form = ReportIncidentForm()
 
@@ -57,6 +58,25 @@ def report_incident(request):
             "max_photos": settings.INCIDENT_MAX_PHOTOS,
             "max_description": settings.INCIDENT_DESCRIPTION_MAX_LENGTH,
         },
+    )
+
+
+@login_required
+@permission_required("view_dashboard")
+def incident_detail(request, pk):
+    incident = get_object_or_404(
+        Incident.objects.prefetch_related("photos", "alerted_roles").select_related(
+            "reporter"
+        ),
+        pk=pk,
+    )
+    if not user_can_view_incident(request.user, incident):
+        messages.error(request, "You do not have access to this incident.")
+        return redirect("portal:dashboard")
+    return render(
+        request,
+        "incidents/detail.html",
+        {"incident": incident, "page_title": f"Incident #{incident.pk}"},
     )
 
 
