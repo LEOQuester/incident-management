@@ -1,10 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
 {% block body_class %}app-shell{% endblock %}
 {% block body %}
 <header class="topbar">
   <div class="topbar-brand">
-    <span class="brand-mark">FMSC</span>
-    <span class="brand-text">Incident Management</span>
+    <img src="{% static 'img/usjp-logo.jpg' %}" alt="USJ" class="brand-logo" width="44" height="44">
+    <div class="brand-copy">
+      <span class="brand-title">FMSC · Incident Management</span>
+      <span class="brand-subtitle">University of Sri Jayewardenepura</span>
+    </div>
   </div>
   <div class="topbar-user">
     <a href="{% url 'incidents:notifications' %}" class="notification-bell" title="Notifications">

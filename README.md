@@ -10,7 +10,7 @@ Django web application for the Faculty of Management Studies and Commerce, Unive
 - **RBAC**: custom permissions and roles; users may hold multiple roles; roles hold many permissions.
 - **Superuser admin UI**: CRUD permissions, roles (with permission assignment), and users (with role assignment).
 - **Dynamic sidebar**: menu items appear from the logged-in user’s permission set; superuser sees an additional admin section.
-- **FMSC styling**: Open Sans / Poppins typography and USJ theme colors (navy `#192f59`, green `#3db166`).
+- **FMSC styling**: Open Sans / Poppins typography, USJ maroon (`#8b1538`), and official USJ logo.
 
 ## Local setup
 

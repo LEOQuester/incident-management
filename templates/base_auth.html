@@ -1,9 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% block body_class %}auth-shell{% endblock %}
 {% block body %}
 <div class="auth-wrap">
   <div class="{% block auth_panel_class %}auth-panel{% endblock %}">
     <div class="auth-brand">
+      <img src="{% static 'img/usjp-logo.jpg' %}" alt="University of Sri Jayewardenepura" class="auth-brand-logo" width="88" height="88">
       <h1>Faculty of Management Studies and Commerce</h1>
       <p>University of Sri Jayewardenepura</p>
       <span class="auth-tag">Incident Management Portal</span>
