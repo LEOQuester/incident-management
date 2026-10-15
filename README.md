@@ -29,9 +29,17 @@ Visit `http://127.0.0.1:8000/accounts/login/`.
 
 ## Railway
 
-1. Create a PostgreSQL service and attach `DATABASE_URL` to the web service.
-2. Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=False`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, and `GEMINI_API_KEY` for your Railway domain.
-3. Deploy this repository; the start command runs migrations, seeds default permissions, and collects static files.
+1. Create a **PostgreSQL** service and attach **`DATABASE_URL`** to the web service (Variables → reference from Postgres).
+2. In the web service **Settings → Networking**, click **Generate domain** (public URL).
+3. Set variables on the web service:
+   - `DJANGO_SECRET_KEY` (long random string)
+   - `DJANGO_DEBUG=False`
+   - `DJANGO_CSRF_TRUSTED_ORIGINS=https://YOUR-DOMAIN.up.railway.app` (your generated URL)
+   - `GEMINI_API_KEY` (optional until you use AI routing)
+4. Redeploy. The app auto-adds `RAILWAY_PUBLIC_DOMAIN` to `ALLOWED_HOSTS` when Railway provides it.
+5. Health check: `GET /health/` should return `{"status": "ok"}`.
+
+If you see **Application failed to respond** while Gunicorn logs look fine, it is usually **wrong `ALLOWED_HOSTS`** (fixed by the Railway domain auto-config above) or **no public domain** generated on the service.
 
 ## Default data
 

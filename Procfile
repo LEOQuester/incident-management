@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py seed_rbac && python manage.py collectstatic --noinput && gunicorn config.wsgi --bind 0.0.0.0:$PORT
+web: bash scripts/start.sh

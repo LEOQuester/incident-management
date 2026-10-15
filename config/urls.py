@@ -1,8 +1,14 @@
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls.static import static
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import include, path
+
+
+def health(request):
+    """Lightweight health check for Railway / load balancers."""
+    return JsonResponse({"status": "ok"})
 
 
 def root_redirect(request):
@@ -12,6 +18,7 @@ def root_redirect(request):
 
 
 urlpatterns = [
+    path("health/", health, name="health"),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("incidents/", include("incidents.urls")),
