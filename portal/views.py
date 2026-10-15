@@ -2,11 +2,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from rbac.decorators import permission_required, superuser_required
-from rbac.forms import PermissionForm, RoleForm
 from accounts.forms import AdminUserForm
 from accounts.models import User
-from rbac.models import Permission, Role
+from rbac.decorators import permission_required, superuser_required
+from rbac.forms import RoleForm
+from rbac.models import Role
 
 
 @login_required
@@ -16,60 +16,6 @@ def dashboard(request):
         request,
         "portal/dashboard.html",
         {"page_title": "Dashboard"},
-    )
-
-
-@superuser_required
-def permission_list(request):
-    permissions = Permission.objects.all()
-    return render(
-        request,
-        "portal/admin/permission_list.html",
-        {"permissions": permissions, "page_title": "Permissions"},
-    )
-
-
-@superuser_required
-def permission_create(request):
-    form = PermissionForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        return redirect("portal:permission_list")
-    return render(
-        request,
-        "portal/admin/permission_form.html",
-        {"form": form, "page_title": "Create Permission"},
-    )
-
-
-@superuser_required
-def permission_edit(request, pk):
-    perm = Permission.objects.get(pk=pk)
-    form = PermissionForm(request.POST or None, instance=perm)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        return redirect("portal:permission_list")
-    return render(
-        request,
-        "portal/admin/permission_form.html",
-        {"form": form, "page_title": "Edit Permission", "object": perm},
-    )
-
-
-@superuser_required
-def permission_delete(request, pk):
-    perm = Permission.objects.get(pk=pk)
-    if request.method == "POST":
-        perm.delete()
-        return redirect("portal:permission_list")
-    return render(
-        request,
-        "portal/admin/confirm_delete.html",
-        {
-            "object": perm,
-            "page_title": "Delete Permission",
-            "cancel_url": "portal:permission_list",
-        },
     )
 
 

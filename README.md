@@ -53,4 +53,4 @@ If you see **Application failed to respond** while Gunicorn logs look fine:
 
 `python manage.py seed_rbac` creates dashboard/report permissions, a **Member** end-user role (auto-assigned on registration), and sample staff roles (**Security**, **IT Support**, **Student Affairs**) used by Gemini routing. Mark any role as **End-user role** in the super admin UI to exclude it from AI alerts.
 
-Superusers manage additional permissions (with optional `url_name` for sidebar links), roles, and user assignments from the in-app Super Admin pages.
+Superusers manage **roles** and **users** in the app UI. Permission codenames and sidebar menu items are defined in `rbac/features.py` and synced on deploy via `seed_rbac`.

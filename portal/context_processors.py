@@ -1,6 +1,6 @@
-from django.urls import NoReverseMatch, reverse
+from django.urls import reverse
 
-from rbac.models import Permission
+from rbac.features import build_sidebar_items, FEATURE_BY_CODENAME
 
 
 def navigation(request):
@@ -9,38 +9,18 @@ def navigation(request):
 
     user = request.user
     if user.is_superuser:
-        perms = Permission.objects.exclude(url_name="").order_by("name")
+        allowed = set(FEATURE_BY_CODENAME.keys())
     else:
-        perms = (
-            Permission.objects.filter(roles__users=user)
-            .exclude(url_name="")
-            .distinct()
-            .order_by("name")
-        )
+        allowed = user.get_permission_codenames()
 
-    sidebar_items = []
-    for perm in perms:
-        try:
-            url = reverse(perm.url_name)
-        except NoReverseMatch:
-            continue
-        sidebar_items.append(
-            {
-                "label": perm.sidebar_label,
-                "url": url,
-                "icon": perm.menu_icon or "fa-circle",
-                "codename": perm.codename,
-            }
-        )
+    sidebar_items = build_sidebar_items(allowed)
 
     admin_sidebar_items = []
     if user.is_superuser:
-        admin_links = [
-            ("portal:permission_list", "Permissions", "fa-key"),
+        for url_name, label, icon in (
             ("portal:role_list", "Roles", "fa-users-cog"),
             ("portal:user_list", "Users", "fa-user-friends"),
-        ]
-        for url_name, label, icon in admin_links:
+        ):
             admin_sidebar_items.append(
                 {"label": label, "url": reverse(url_name), "icon": icon}
             )
