@@ -1,6 +1,4 @@
-from django.urls import reverse
-
-from rbac.features import build_sidebar_items, FEATURE_BY_CODENAME
+from rbac.features import FEATURE_BY_CODENAME, build_sidebar_items
 
 
 def navigation(request):
@@ -13,19 +11,7 @@ def navigation(request):
     else:
         allowed = user.get_permission_codenames()
 
-    sidebar_items = build_sidebar_items(allowed)
-
-    admin_sidebar_items = []
-    if user.is_superuser:
-        for url_name, label, icon in (
-            ("portal:role_list", "Roles", "fa-users-cog"),
-            ("portal:user_list", "Users", "fa-user-friends"),
-        ):
-            admin_sidebar_items.append(
-                {"label": label, "url": reverse(url_name), "icon": icon}
-            )
-
     return {
-        "sidebar_items": sidebar_items,
-        "admin_sidebar_items": admin_sidebar_items,
+        "sidebar_items": build_sidebar_items(allowed, section="menu"),
+        "admin_sidebar_items": build_sidebar_items(allowed, section="admin"),
     }

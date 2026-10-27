@@ -20,7 +20,7 @@
         <td>{% if role.is_end_user_role %}Yes{% else %}No{% endif %}</td>
         <td>
           {% for perm in role.permissions.all %}
-          <span class="badge">{{ perm.codename }}</span>
+          <span class="badge" title="{{ perm.codename }}">{{ perm.name }}</span>
           {% empty %}—{% endfor %}
         </td>
         <td class="actions">

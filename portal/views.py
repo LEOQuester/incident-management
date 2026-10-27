@@ -4,10 +4,12 @@ from django.shortcuts import redirect, render
 
 from accounts.forms import AdminUserForm
 from accounts.models import User
-from rbac.decorators import permission_required, superuser_required
-from rbac.forms import RoleForm
+from rbac.decorators import permission_required
+from rbac.features import sync_permissions_to_database
+from rbac.forms import PermissionCreateForm, RoleForm, display_name_for_codename
+from rbac.portal_access import can_manage_permissions, can_view_permissions
 from incidents.access import incidents_queryset_for_user
-from rbac.models import Role
+from rbac.models import Permission, Role
 
 
 @login_required
@@ -35,7 +37,65 @@ def dashboard(request):
     )
 
 
-@superuser_required
+@login_required
+def permission_list(request):
+    if not can_view_permissions(request.user):
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("portal:access_denied")
+    sync_permissions_to_database()
+    permissions = Permission.objects.all().order_by("sort_order", "name")
+    return render(
+        request,
+        "portal/admin/permission_list.html",
+        {
+            "permissions": permissions,
+            "page_title": "Permissions",
+            "can_manage_permissions": can_manage_permissions(request.user),
+        },
+    )
+
+
+@permission_required("manage_permissions")
+def permission_create(request):
+    form = PermissionCreateForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        codename = form.cleaned_data["codename"]
+        Permission.objects.create(
+            codename=codename,
+            name=display_name_for_codename(codename),
+            is_builtin=False,
+        )
+        messages.success(request, "Permission created.")
+        return redirect("portal:permission_list")
+    return render(
+        request,
+        "portal/admin/permission_form.html",
+        {"form": form, "page_title": "Create Permission"},
+    )
+
+
+@permission_required("manage_permissions")
+def permission_delete(request, pk):
+    permission = Permission.objects.get(pk=pk)
+    if permission.is_builtin:
+        messages.error(request, "Built-in permissions cannot be deleted.")
+        return redirect("portal:permission_list")
+    if request.method == "POST":
+        permission.delete()
+        messages.success(request, "Permission deleted.")
+        return redirect("portal:permission_list")
+    return render(
+        request,
+        "portal/admin/confirm_delete.html",
+        {
+            "object": permission,
+            "page_title": "Delete Permission",
+            "cancel_url": "portal:permission_list",
+        },
+    )
+
+
+@permission_required("manage_roles")
 def role_list(request):
     roles = Role.objects.prefetch_related("permissions")
     return render(
@@ -45,7 +105,7 @@ def role_list(request):
     )
 
 
-@superuser_required
+@permission_required("manage_roles")
 def role_create(request):
     form = RoleForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -58,7 +118,7 @@ def role_create(request):
     )
 
 
-@superuser_required
+@permission_required("manage_roles")
 def role_edit(request, pk):
     role = Role.objects.get(pk=pk)
     form = RoleForm(request.POST or None, instance=role)
@@ -72,7 +132,7 @@ def role_edit(request, pk):
     )
 
 
-@superuser_required
+@permission_required("manage_roles")
 def role_delete(request, pk):
     role = Role.objects.get(pk=pk)
     if request.method == "POST":
@@ -89,7 +149,7 @@ def role_delete(request, pk):
     )
 
 
-@superuser_required
+@permission_required("manage_users")
 def user_list(request):
     users = User.objects.prefetch_related("roles")
     return render(
@@ -99,7 +159,7 @@ def user_list(request):
     )
 
 
-@superuser_required
+@permission_required("manage_users")
 def user_create(request):
     form = AdminUserForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -119,7 +179,7 @@ def user_create(request):
     )
 
 
-@superuser_required
+@permission_required("manage_users")
 def user_edit(request, pk):
     user = User.objects.get(pk=pk)
     form = AdminUserForm(request.POST or None, instance=user)
@@ -133,7 +193,7 @@ def user_edit(request, pk):
     )
 
 
-@superuser_required
+@permission_required("manage_users")
 def user_delete(request, pk):
     user = User.objects.get(pk=pk)
     if request.method == "POST":

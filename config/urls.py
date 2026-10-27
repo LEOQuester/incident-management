@@ -31,12 +31,12 @@ urlpatterns = [
     # Legacy super-admin paths (must be registered before django.contrib.admin /admin/)
     path(
         "admin/permissions/",
-        lambda r: redirect("portal:role_list"),
+        lambda r: redirect("portal:permission_list"),
         name="legacy_permissions",
     ),
     path(
         "admin/permissions/<path:trail>",
-        lambda r, trail: redirect("portal:role_list"),
+        lambda r, trail: redirect("portal:permission_list"),
     ),
     path(
         "admin/roles/",

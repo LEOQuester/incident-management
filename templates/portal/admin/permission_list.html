@@ -1,0 +1,48 @@
+{% extends "base_app.html" %}
+{% block content %}
+<p class="page-lead">
+  Assign permission codes to roles on the
+  <a href="{% url 'portal:role_list' %}">Roles</a> page.
+</p>
+{% if can_manage_permissions %}
+<div class="toolbar">
+  <a href="{% url 'portal:permission_create' %}" class="btn btn-primary">New Permission</a>
+</div>
+{% endif %}
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Permission code</th>
+        <th>Type</th>
+        {% if can_manage_permissions %}<th></th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for perm in permissions %}
+      <tr>
+        <td><code>{{ perm.codename }}</code></td>
+        <td>
+          {% if perm.is_builtin %}
+          <span class="badge">Built-in</span>
+          {% else %}
+          <span class="badge badge-accent">Custom</span>
+          {% endif %}
+        </td>
+        {% if can_manage_permissions %}
+        <td class="actions">
+          {% if not perm.is_builtin %}
+          <a href="{% url 'portal:permission_delete' perm.pk %}" class="danger">Delete</a>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        {% endif %}
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No permissions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

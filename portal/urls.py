@@ -7,6 +7,13 @@ app_name = "portal"
 urlpatterns = [
     path("access-denied/", views.access_denied, name="access_denied"),
     path("", views.dashboard, name="dashboard"),
+    path("manage/permissions/", views.permission_list, name="permission_list"),
+    path("manage/permissions/new/", views.permission_create, name="permission_create"),
+    path(
+        "manage/permissions/<int:pk>/delete/",
+        views.permission_delete,
+        name="permission_delete",
+    ),
     path("manage/roles/", views.role_list, name="role_list"),
     path("manage/roles/new/", views.role_create, name="role_create"),
     path("manage/roles/<int:pk>/edit/", views.role_edit, name="role_edit"),
