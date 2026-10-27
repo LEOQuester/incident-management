@@ -75,6 +75,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.NoStoreHTMLMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -170,6 +171,13 @@ PHONENUMBER_DEFAULT_REGION = "LK"
 PHONENUMBER_DB_FORMAT = "E164"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Railway terminates TLS at its proxy. Mark auth and CSRF cookies as HTTPS-only
+# in production while retaining ordinary HTTP cookies for local development.
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

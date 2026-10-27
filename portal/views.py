@@ -11,6 +11,12 @@ from rbac.models import Role
 
 
 @login_required
+def access_denied(request):
+    """A stable destination for authenticated users without portal access."""
+    return render(request, "portal/access_denied.html", {"page_title": "Access denied"})
+
+
+@login_required
 @permission_required("view_dashboard")
 def dashboard(request):
     incidents = (

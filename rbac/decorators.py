@@ -20,7 +20,7 @@ def permission_required(codename: str):
                 request,
                 "You do not have permission to access this page.",
             )
-            return redirect("portal:dashboard")
+            return redirect("portal:access_denied")
 
         return _wrapped
 
@@ -34,7 +34,7 @@ def superuser_required(view_func):
             return redirect("accounts:login")
         if not request.user.is_superuser:
             messages.error(request, "Superuser access is required.")
-            return redirect("portal:dashboard")
+            return redirect("portal:access_denied")
         return view_func(request, *args, **kwargs)
 
     return _wrapped

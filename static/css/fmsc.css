@@ -197,6 +197,30 @@ a {
   box-shadow: 0 0 0 2px rgba(139, 21, 56, 0.18);
 }
 
+.form-group.has-error label,
+.form-group.has-error .help-text,
+.errorlist {
+  color: #b42318;
+}
+
+.form-group.has-error .form-control {
+  border-color: #b42318;
+  background-color: #fff7f6;
+}
+
+.form-group.has-error .form-control:focus {
+  border-color: #8a1c13;
+  box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.18);
+}
+
+.errorlist {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 .btn {
   display: inline-block;
   border: none;

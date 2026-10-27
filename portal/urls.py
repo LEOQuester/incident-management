@@ -5,6 +5,7 @@ from portal import views
 app_name = "portal"
 
 urlpatterns = [
+    path("access-denied/", views.access_denied, name="access_denied"),
     path("", views.dashboard, name="dashboard"),
     path("manage/roles/", views.role_list, name="role_list"),
     path("manage/roles/new/", views.role_create, name="role_create"),

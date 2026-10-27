@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -22,7 +21,7 @@ class UserLogoutView(LogoutView):
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = "accounts/register.html"
-    success_url = reverse_lazy("portal:dashboard")
+    success_url = reverse_lazy("accounts:login")
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -34,10 +33,8 @@ class RegisterView(CreateView):
         member_role = Role.objects.filter(name="Member").first()
         if member_role:
             self.object.roles.add(member_role)
-        login(
+        messages.success(
             self.request,
-            self.object,
-            backend="accounts.backends.MultiIdentifierBackend",
+            "Registration successful. Please sign in with your new account.",
         )
-        messages.success(self.request, "Welcome to FMSC Incident Management.")
         return response
