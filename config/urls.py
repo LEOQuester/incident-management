@@ -1,8 +1,4 @@
-import os
-
-from django.conf import settings
 from django.contrib import admin
-from django.conf.urls.static import static
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import include, path
@@ -67,6 +63,4 @@ urlpatterns = [
     path("home/", root_redirect, name="home"),
 ]
 
-# Incident photos (use Railway volume or external storage for durable production media)
-if settings.DEBUG or os.environ.get("SERVE_MEDIA", "").lower() in ("1", "true", "yes"):
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Evidence is served only by authenticated incidents attachment endpoints.

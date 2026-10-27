@@ -1,0 +1,9 @@
+{% extends "base_app.html" %}
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="card form-card">
+  {% csrf_token %}{{ form.as_p }}
+  {% if evidence %}<p><label>Evidence (up to 5 files; images 5 MiB, MP4/WebM videos 25 MiB and 120 seconds each by default)<input type="file" name="evidence" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"></label></p>{% endif %}
+  <button class="btn btn-primary" type="submit">Save</button>
+</form>
+{% endblock %}
+{% block extra_js %}{% load static %}<script src="{% static 'js/evidence-upload.js' %}"></script>{% endblock %}

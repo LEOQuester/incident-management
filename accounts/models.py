@@ -7,6 +7,8 @@ class User(AbstractUser):
     """FMSC user: login via username, email, or E.164 phone number."""
 
     email = models.EmailField("email address", blank=True, unique=True, null=True)
+    user_type = models.CharField(max_length=20, choices=[("student", "Student"), ("lecturer", "Lecturer"), ("staff", "Staff")], default="student")
+    department = models.CharField(max_length=150, blank=True)
     phone = PhoneNumberField(unique=True, blank=True, null=True)
     mc_number = models.CharField(
         max_length=20,

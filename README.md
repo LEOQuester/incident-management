@@ -1,4 +1,6 @@
-# FMSC Incident Management (USJ)
+# FMSC Complaint and Suggestion Management (USJ)
+
+The manual case workflow now follows `srs.md`, with the existing user dashboard left unchanged. See [SRS_IMPLEMENTATION.md](SRS_IMPLEMENTATION.md) for role setup, case handling, private evidence, email, reminders, backups, migrations, and test commands. The current submission path uses administrator review and authority assignment; automatic Gemini routing described in older project notes below is no longer invoked.
 
 Django web application for the Faculty of Management Studies and Commerce, University of Sri Jayewardenepura. Provides universal login/registration and role-based access control, ready for Railway deployment.
 

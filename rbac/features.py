@@ -21,6 +21,11 @@ class AppFeature:
 
 # Order in this list is the sidebar menu order.
 APP_FEATURES: tuple[AppFeature, ...] = (
+    AppFeature("view_profile", "View Own Profile", "accounts:profile", "My Profile", "fa-user"),
+    AppFeature("manage_cases", "Review and Assign Cases", "incidents:queue", "Case Management", "fa-list-check"),
+    AppFeature("update_cases", "Update Assigned Cases", "incidents:queue", "Authority Work Queue", "fa-tasks"),
+    AppFeature("view_reports", "View Management Reports", "incidents:queue", "Management Reports", "fa-chart-bar"),
+    AppFeature("manage_catalogs", "Manage Authorities and Categories", "incidents:catalog_home", "Authorities and Categories", "fa-building", menu_section="admin"),
     AppFeature(
         codename="view_dashboard",
         name="View Dashboard",

@@ -30,6 +30,8 @@ class LoginForm(AuthenticationForm):
 
 
 class RegisterForm(UserCreationForm):
+    user_type = forms.ChoiceField(choices=[("student", "Student"), ("lecturer", "Lecturer")], initial="student", required=False)
+    department = forms.CharField(max_length=150, required=False)
     email = forms.EmailField(
         required=False,
         widget=forms.EmailInput(
@@ -75,6 +77,8 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = (
             "username",
+            "user_type",
+            "department",
             "first_name",
             "last_name",
             "email",
@@ -92,6 +96,8 @@ class RegisterForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["mc_number"].required = False
+        self.fields["cpm_number"].required = False
         for field in ("password1", "password2"):
             self.fields[field].widget.attrs.update(
                 {"class": "form-control", "placeholder": self.fields[field].label}
@@ -107,6 +113,8 @@ class RegisterForm(UserCreationForm):
 
     def clean_mc_number(self):
         raw = self.cleaned_data.get("mc_number", "")
+        if not raw and self.data.get("user_type") == "lecturer":
+            return None
         try:
             mc = normalize_mc_number(raw)
         except ValueError as exc:
@@ -117,6 +125,8 @@ class RegisterForm(UserCreationForm):
 
     def clean_cpm_number(self):
         raw = self.cleaned_data.get("cpm_number", "")
+        if not raw and self.data.get("user_type") == "lecturer":
+            return None
         try:
             cpm = normalize_cpm_number(raw)
         except ValueError as exc:
@@ -156,6 +166,9 @@ class RegisterForm(UserCreationForm):
             )
         return cleaned
 
+    def clean_user_type(self):
+        return self.cleaned_data.get("user_type") or "student"
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data.get("email")
@@ -178,6 +191,8 @@ class AdminUserForm(forms.ModelForm):
         model = User
         fields = (
             "username",
+            "user_type",
+            "department",
             "first_name",
             "last_name",
             "email",
@@ -272,3 +287,9 @@ class AdminUserForm(forms.ModelForm):
             user.save()
             self.save_m2m()
         return user
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "department")

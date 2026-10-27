@@ -191,3 +191,16 @@ INCIDENT_ALLOWED_IMAGE_TYPES = {
     "image/webp",
     "image/gif",
 }
+
+# Configure SMTP in deployment; local email is printed to the console.
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("1", "true", "yes")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@localhost")
+EMAIL_TIMEOUT = 10
+INCIDENT_VIDEO_MAX_BYTES = int(os.environ.get("INCIDENT_VIDEO_MAX_BYTES", str(25 * 1024 * 1024)))
+INCIDENT_VIDEO_MAX_SECONDS = int(os.environ.get("INCIDENT_VIDEO_MAX_SECONDS", "120"))
+FFPROBE_PATH = os.environ.get("FFPROBE_PATH", "ffprobe")

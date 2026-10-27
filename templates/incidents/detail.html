@@ -1,50 +1,18 @@
 {% extends "base_app.html" %}
 {% block content %}
-<p class="back-link"><a href="{% url 'portal:dashboard' %}">&larr; Back to dashboard</a></p>
-
-<div class="card incident-detail">
-  <div class="incident-detail-header">
-    <h2>Incident #{{ incident.pk }}</h2>
-    <span class="status-pill status-{{ incident.status }}">{{ incident.get_status_display }}</span>
-  </div>
-
-  <dl class="incident-meta">
-    <div>
-      <dt>Submitted</dt>
-      <dd>{{ incident.created_at|date:"l, j F Y, H:i" }}</dd>
-    </div>
-    <div>
-      <dt>Reporter</dt>
-      <dd>{{ incident.reporter.get_display_name }} ({{ incident.reporter.username }})</dd>
-    </div>
-    {% if incident.alerted_roles.exists %}
-    <div>
-      <dt>Alerted roles</dt>
-      <dd>
-        {% for role in incident.alerted_roles.all %}
-        <span class="badge">{{ role.name }}</span>
-        {% endfor %}
-      </dd>
-    </div>
-    {% endif %}
-  </dl>
-
-  <div class="incident-description-block">
-    <h3>Description</h3>
-    <p class="incident-description-text">{{ incident.description }}</p>
-  </div>
-
-  {% if incident.photos.all %}
-  <div class="incident-photos-block">
-    <h3>Photos</h3>
-    <div class="incident-detail-photos">
-      {% for photo in incident.photos.all %}
-      <a href="{{ photo.image.url }}" target="_blank" rel="noopener" class="incident-photo-link">
-        <img src="{{ photo.image.url }}" alt="Incident photo {{ forloop.counter }}">
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
+<div class="card">
+<h2>{{ incident.case_number }} — {{ incident.title }}</h2>
+<p>{{ incident.get_case_type_display }} | {{ incident.get_priority_display }} | {{ incident.get_status_display }}</p>
+<p>Category: {{ incident.category|default:'Uncategorised' }} | Location: {{ incident.location }}</p>
+<p>Reporter: {{ incident.reporter.get_display_name }} | Submitted: {{ incident.created_at }} | Authority: {{ incident.authority|default:'Unassigned' }}</p>
+<p style="white-space:pre-wrap">{{ incident.description }}</p>
+{% if incident.resolution_note %}<h3>Resolution</h3><p>{{ incident.resolution_note }}</p>{% endif %}
+{% if can_update %}<a class="btn btn-primary" href="{% url 'incidents:update' incident.pk %}">Review / update case</a>{% endif %}
+<h3>Evidence</h3>
+{% for file in incident.attachments.all %}<p><a href="{% url 'incidents:attachment' file.pk %}">Download {% if file.is_completion %}completion {% endif %}evidence {{ forloop.counter }} ({{ file.content_type }})</a></p>{% endfor %}
+{% for photo in incident.photos.all %}<p><a href="{% url 'incidents:photo' photo.pk %}">Download original photo {{ forloop.counter }}</a></p>{% endfor %}
+<h3>Case history</h3>
+{% for update in updates %}<article><p>{{ update.created_at }} — {{ update.actor|default:'System' }} {% if update.internal %}(Internal){% endif %}</p><p>{{ update.comment }}</p>
+{% for field,change in update.changes.items %}{% if field != 'resolution_note' %}<p>{{ field }}: {{ change.old|default:'None' }} ? {{ change.new|default:'None' }}</p>{% endif %}{% endfor %}</article>{% endfor %}
 </div>
 {% endblock %}

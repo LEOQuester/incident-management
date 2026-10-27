@@ -27,6 +27,10 @@ class MultiIdentifierBackend(ModelBackend):
         if "@" in identifier:
             return User.objects.filter(email__iexact=identifier).first()
 
+        registration_user = User.objects.filter(Q(mc_number__iexact=identifier) | Q(cpm_number__iexact=identifier)).first()
+        if registration_user:
+            return registration_user
+
         phone_user = self._user_by_phone(identifier)
         if phone_user:
             return phone_user

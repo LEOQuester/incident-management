@@ -10,6 +10,7 @@
   <article class="notification-item {% if not note.is_read %}unread{% endif %}">
     <div class="notification-body">
       <p>{{ note.message }}</p>
+      {% if note.incident %}<a href="{% url 'incidents:detail' note.incident.pk %}">View case</a>{% endif %}
       <time>{{ note.created_at }}</time>
     </div>
     {% if not note.is_read %}

@@ -1,0 +1,7 @@
+{% extends "base_app.html" %}
+{% block content %}
+<p><a href="{% url 'incidents:catalog' 'authorities' %}">Authorities</a> | <a href="{% url 'incidents:catalog' 'categories' %}">Categories</a> | <a href="{% url 'incidents:catalog' kind %}">Add new</a></p>
+<div class="card"><ul>{% for item in items %}<li><a href="{% url 'incidents:catalog_edit' kind item.pk %}">{{ item }}</a> — {{ item.is_active|yesno:"Active,Inactive" }}</li>{% empty %}<li>No records yet.</li>{% endfor %}</ul></div>
+<form method="post" class="card form-card">{% csrf_token %}{{ form.as_p }}<button type="submit" class="btn btn-primary">Save</button>
+{% if object %}<button type="submit" name="action" value="delete" class="btn btn-secondary" formnovalidate>Delete</button>{% endif %}</form>
+{% endblock %}

@@ -10,6 +10,7 @@
   {% endif %}
 
   <div class="register-form-grid">
+    <div class="register-form-full form-group">{{ form.user_type.label_tag }}{{ form.user_type }}{{ form.user_type.errors }}{{ form.department.label_tag }}{{ form.department }}{{ form.department.errors }}<p>MC and CPM numbers are required for students; optional for lecturers.</p></div>
     <div class="register-form-col">
       <div class="form-group{% if form.username.errors %} has-error{% endif %}">
         <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>

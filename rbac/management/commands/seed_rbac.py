@@ -37,7 +37,7 @@ class Command(BaseCommand):
         Role.objects.filter(name="Member").update(is_end_user_role=True)
         member.permissions.set(
             Permission.objects.filter(
-                codename__in=("view_dashboard", "report_incident")
+                codename__in=("view_dashboard", "report_incident", "view_profile")
             )
         )
 
@@ -49,6 +49,22 @@ class Command(BaseCommand):
                     "is_end_user_role": False,
                 },
             )
+
+        defaults = {
+            "Student": ("view_dashboard", "report_incident"),
+            "Lecturer": ("view_dashboard", "report_incident"),
+            "Administrator": ("view_dashboard", "manage_cases"),
+            "Relevant Authority": ("view_dashboard", "update_cases"),
+            "Faculty Management": ("view_dashboard", "view_reports"),
+            "System Administrator": ("view_dashboard", "manage_users", "manage_roles", "manage_permissions", "view_permissions", "manage_catalogs"),
+        }
+        for name, codenames in defaults.items():
+            role, created = Role.objects.get_or_create(name=name, defaults={"is_end_user_role": name in {"Student", "Lecturer"}})
+            if created:
+                role.permissions.set(Permission.objects.filter(codename__in=(*codenames, "view_profile")))
+        from incidents.models import Category
+        for name in ("Classroom", "IT", "Maintenance", "Examination", "Other"):
+            Category.objects.get_or_create(name=name)
 
         self.stdout.write(
             self.style.SUCCESS(

@@ -3,8 +3,9 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.contrib.auth.decorators import login_required
 
-from accounts.forms import LoginForm, RegisterForm
+from accounts.forms import LoginForm, RegisterForm, ProfileForm
 from rbac.models import Role
 
 
@@ -33,8 +34,21 @@ class RegisterView(CreateView):
         member_role = Role.objects.filter(name="Member").first()
         if member_role:
             self.object.roles.add(member_role)
+        role = Role.objects.filter(name="Lecturer" if self.object.user_type == "lecturer" else "Student").first()
+        if role:
+            self.object.roles.add(role)
         messages.success(
             self.request,
             "Registration successful. Please sign in with your new account.",
         )
         return response
+
+
+@login_required
+def profile(request):
+    form = ProfileForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profile updated.")
+        return redirect("accounts:profile")
+    return render(request, "accounts/profile.html", {"form": form, "page_title": "My Profile"})
