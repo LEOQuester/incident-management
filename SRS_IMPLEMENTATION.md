@@ -1,6 +1,12 @@
 # SRS implementation
 
-The existing user dashboard template and view are unchanged. New operational and management reports live at `/incidents/queue/`.
+The main dashboard at `/` provides interactive case summaries, status/category drill-downs, a searchable and sortable case list, CSV export, resolution performance, not-started ageing, and staff authority workload. It uses the existing case visibility rules: reporters see their own cases, authority members with `update_cases` also see their assigned cases, and users with `manage_cases` or `view_reports` see all cases. Operational and management reports remain available at `/incidents/queue/`.
+
+## Interactive dashboard
+
+Date range, category, authority, status, priority, case type and search filters apply to every dashboard report. Summary cards narrow the case list without changing the overview; chart and authority links apply a dashboard-wide filter. Sorting and pagination retain the selected filters. CSV includes all cases matching the current filters and selected summary, not only the visible page. Invalid filters show validation errors and no results. Category/authority filter options come only from cases visible to the current user.
+
+Attempted means reviewed or moved beyond submission (legacy routing-only records without review remain not attempted). Not started means accepted or assigned without a recorded action start. Open excludes closed/rejected, so solved cases awaiting closure remain open. Pending excludes solved/closed/rejected. Average resolution uses solved_at, falling back to closed_at, for currently solved/closed cases with a valid completion time. Missing completion data displays a dash rather than a misleading zero. Ageing shows the oldest 10 matching not-started cases; authority workload shows the 10 largest pending workloads. Summary definitions are also available on the dashboard.
 
 ## Workflow
 

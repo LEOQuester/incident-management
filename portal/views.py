@@ -8,7 +8,7 @@ from rbac.decorators import permission_required
 from rbac.features import sync_permissions_to_database
 from rbac.forms import PermissionCreateForm, RoleForm, display_name_for_codename
 from rbac.portal_access import can_manage_permissions, can_view_permissions
-from incidents.access import incidents_queryset_for_user
+from portal.dashboard import dashboard_context
 from rbac.models import Permission, Role
 
 
@@ -21,20 +21,10 @@ def access_denied(request):
 @login_required
 @permission_required("view_dashboard")
 def dashboard(request):
-    incidents = (
-        incidents_queryset_for_user(request.user)
-        .select_related("reporter")
-        .prefetch_related("photos", "alerted_roles")[:50]
-    )
-    return render(
-        request,
-        "portal/dashboard.html",
-        {
-            "page_title": "Dashboard",
-            "incidents": incidents,
-            "can_report_incident": request.user.has_rbac_permission("report_incident"),
-        },
-    )
+    context = dashboard_context(request)
+    if not isinstance(context, dict):
+        return context
+    return render(request, "portal/dashboard.html", context)
 
 
 @login_required

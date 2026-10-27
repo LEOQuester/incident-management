@@ -1,55 +1,67 @@
 {% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
 {% block content %}
-<div class="card dashboard-welcome">
-  <p>Welcome, <strong>{{ user.get_display_name }}</strong>.</p>
-  <p class="text-muted">
-    Incidents you submitted{% if not user.is_superuser %} or routed to your role{% endif %}{% if user.is_superuser %} and all system reports{% endif %} are listed below.
-  </p>
-  {% if can_report_incident %}
-  <p><a href="{% url 'incidents:report' %}" class="btn btn-primary btn-sm">Report new incident</a></p>
-  {% endif %}
-</div>
-
-<div class="card incident-list-card">
-  <h2 class="card-title">Submitted incidents</h2>
-
-  {% if incidents %}
-  <div class="table-wrap">
-    <table class="data-table incident-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Submitted</th>
-          <th>Status</th>
-          {% if user.is_superuser %}<th>Reporter</th>{% endif %}
-          <th>Summary</th>
-          <th>Photos</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for incident in incidents %}
-        <tr>
-          <td><strong>#{{ incident.pk }}</strong></td>
-          <td>{{ incident.created_at|date:"Y-m-d H:i" }}</td>
-          <td>
-            <span class="status-pill status-{{ incident.status }}">{{ incident.get_status_display }}</span>
-          </td>
-          {% if user.is_superuser %}
-          <td>{{ incident.reporter.get_display_name }}</td>
-          {% endif %}
-          <td class="incident-excerpt">{{ incident.description|truncatechars:80 }}</td>
-          <td>{{ incident.photos.count }}</td>
-          <td class="actions">
-            <a href="{% url 'incidents:detail' incident.pk %}">View details</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<div class="case-dashboard">
+  <section class="dashboard-intro" aria-label="Dashboard overview">
+    <div>
+      <p class="dashboard-eyebrow">FMSC / COMPLAINTS &amp; SUGGESTIONS</p>
+      <h2>Welcome, {{ user.get_display_name }}.</h2>
+      <p>{% if all_case_access %}A faculty-wide view of case progress, priorities and responsibility.{% elif staff_dashboard %}Track your cases and work assigned to your authorities.{% else %}Track your complaints and suggestions, from submission to resolution.{% endif %}</p>
+      <span class="scope-chip"><i class="fa fa-lock" aria-hidden="true"></i> {% if all_case_access %}All faculty cases{% elif staff_dashboard %}Your cases &amp; assigned authorities{% else %}Your cases only{% endif %}</span>
+    </div>
+    <div class="dashboard-actions">
+      {% if can_report_incident %}<a href="{% url 'incidents:report' %}" class="btn btn-primary"><i class="fa fa-plus" aria-hidden="true"></i> Submit a case</a>{% endif %}
+      {% if staff_dashboard %}<a href="{% url 'incidents:queue' %}" class="btn btn-secondary">Work queue <span aria-hidden="true">→</span></a>{% else %}<a href="{% url 'incidents:notifications' %}" class="btn btn-secondary">Notifications</a>{% endif %}
+    </div>
+  </section>
+  <section class="card dashboard-filter-panel" aria-labelledby="filter-heading">
+    <div class="section-heading"><div><h2 id="filter-heading">Explore cases</h2><p>Filters update every summary and report below.</p></div><a href="{% url 'portal:dashboard' %}">Reset filters</a></div>
+    <form method="get" id="dashboard-filters">
+      {{ filter_form.non_field_errors }}
+      {% if filter_form.focus.errors or filter_form.sort.errors %}<div class="alert alert-error" role="alert">{{ filter_form.focus.errors }}{{ filter_form.sort.errors }} <a href="{% url 'portal:dashboard' %}">Reset invalid filters</a></div>{% endif %}
+      <div class="dashboard-filters">
+        {% for field in filter_form %}{% if field.name != 'focus' and field.name != 'sort' %}
+        <div class="form-group{% if field.errors %} has-error{% endif %}{% if field.name == 'q' %} dashboard-search{% endif %}">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="filter-footer"><button type="submit" class="btn btn-primary">Apply filters</button><span>Updated {{ updated_at|date:"d M Y, H:i" }} &middot; {{ total }} matching case{{ total|pluralize }}</span></div>
+    </form>
+  </section>
+  <div class="section-heading metrics-heading"><div><h2>Case overview</h2><p>Select a summary to explore its cases.</p></div></div>
+  <section class="dashboard-metrics" aria-label="Case summaries">
+    {% for card in cards %}<a class="metric-card{% if focus == card.key %} is-active{% endif %} metric-{{ card.key }}" href="{{ card.url }}" {% if focus == card.key %}aria-current="true"{% endif %}><span class="metric-label">{{ card.label }}</span><strong>{{ card.count }}</strong><span class="metric-action">View cases <span aria-hidden="true">↗</span></span></a>{% endfor %}
+  </section>
+  <section class="dashboard-performance" aria-label="Resolution performance">
+    <div><span>Resolution rate</span><strong>{{ resolution_rate }}<small>%</small></strong><p>Solved or closed / matching cases</p></div>
+    <div><span>Average resolution</span><strong>{% if average_resolution_days != None %}{{ average_resolution_days }}<small> days</small>{% else %}—{% endif %}</strong><p>Time to solve or close a resolved case</p></div>
+    <div><span>Solved this month</span><strong>{{ solved_this_month }}</strong><p>Matching cases resolved this calendar month</p></div>
+    <div><span>Pending for 7+ days</span><strong>{{ old_pending_count }}</strong><p>Excludes solved, closed and rejected cases</p></div>
+  </section>
+  <div class="dashboard-chart-grid">
+    <section class="card" aria-labelledby="status-heading">
+      <div class="section-heading"><div><h2 id="status-heading">Case progress</h2><p>Select a status to filter the dashboard.</p></div><span class="chart-icon"><i class="fa fa-chart-bar" aria-hidden="true"></i></span></div>
+      <div class="dashboard-bars">{% for row in status_rows %}<a href="{{ row.url }}" class="bar-row"><span class="bar-label">{{ row.label }}</span><span class="bar-track"><span class="bar-fill" style="width: {{ row.percent }}%"></span></span><strong>{{ row.count }}</strong></a>{% empty %}<p class="dashboard-empty">No case activity for these filters.</p>{% endfor %}</div>
+    </section>
+    <section class="card" aria-labelledby="category-heading">
+      <div class="section-heading"><div><h2 id="category-heading">Top categories</h2><p>Six largest categories in this selection.</p></div><span class="chart-icon"><i class="fa fa-layer-group" aria-hidden="true"></i></span></div>
+      <div class="dashboard-bars category-bars">{% for row in category_rows %}{% if row.url %}<a href="{{ row.url }}" class="bar-row">{% else %}<div class="bar-row">{% endif %}<span class="bar-label">{{ row.category__name|default:"Uncategorised" }}</span><span class="bar-track"><span class="bar-fill" style="width: {{ row.percent }}%"></span></span><strong>{{ row.total }}</strong>{% if row.url %}</a>{% else %}</div>{% endif %}{% empty %}<p class="dashboard-empty">No categories to display yet.</p>{% endfor %}</div>
+      <div class="case-type-summary" aria-label="Case types">{% for row in type_rows %}<a href="{{ row.url }}"><span>{{ row.label }}{{ row.count|pluralize }}</span><strong>{{ row.count }}</strong></a>{% endfor %}</div>
+    </section>
   </div>
-  {% else %}
-  <p class="text-muted empty-incidents">No incidents yet.{% if can_report_incident %} Use <strong>Report Incident</strong> to submit one.{% endif %}</p>
-  {% endif %}
+  <section class="card dashboard-case-list" id="case-list" aria-labelledby="cases-heading">
+    <div class="section-heading"><div><h2 id="cases-heading">{{ focus_label }}</h2><p>{{ page_obj.paginator.count }} case{{ page_obj.paginator.count|pluralize }} &middot; showing {{ page_obj.start_index }}–{{ page_obj.end_index }}{% if focus != 'total' %} &middot; Summary selected{% endif %}</p></div><div class="list-actions">{% if valid_filters %}<a class="btn btn-secondary" href="{{ export_url }}">Export CSV</a>{% endif %}<form method="get" id="case-sort-form">{% for key,value in request.GET.items %}{% if key != 'sort' and key != 'page' and key != 'export' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}<label for="id_sort" class="visually-hidden">Sort cases</label>{{ filter_form.sort }}<button type="submit" class="btn btn-secondary">Sort</button></form></div></div>
+    {% if page_obj %}<div class="table-wrap"><table class="data-table dashboard-table"><caption class="visually-hidden">Cases matching the current filters and summary</caption><thead><tr><th scope="col">Case / title</th><th scope="col">Type / priority</th><th scope="col">Status</th><th scope="col">Authority</th><th scope="col">Submitted</th><th scope="col">Age</th><th scope="col">Action</th></tr></thead><tbody>
+      {% for case in page_obj %}<tr><td><a class="case-reference" href="{% url 'incidents:detail' case.pk %}">{{ case.case_number }}</a><span class="case-title">{{ case.title|default:case.description|truncatechars:75 }}</span>{% if staff_dashboard %}<span class="case-subtext">{{ case.reporter.get_display_name }}</span>{% endif %}</td><td>{{ case.get_case_type_display }}<span class="priority-badge priority-{{ case.priority }}">{% if case.priority == 'urgent' %}<i class="fa fa-bolt" aria-hidden="true"></i> {% endif %}{{ case.get_priority_display }}</span></td><td><span class="status-pill status-{{ case.status }}">{{ case.get_status_display }}</span></td><td>{{ case.authority|default:"Unassigned" }}</td><td class="nowrap">{{ case.created_at|date:"d M Y" }}</td><td class="nowrap">{{ case.age_days }} days</td><td><a href="{% url 'incidents:detail' case.pk %}">View <span class="visually-hidden">{{ case.case_number }}</span> <span aria-hidden="true">↗</span></a></td></tr>{% endfor %}
+    </tbody></table></div><nav class="dashboard-pagination" aria-label="Case pages"><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span><div>{% if previous_url %}<a class="btn btn-secondary" href="{{ previous_url }}#case-list">Previous</a>{% endif %}{% if next_url %}<a class="btn btn-secondary" href="{{ next_url }}#case-list">Next</a>{% endif %}</div></nav>
+    {% else %}<div class="dashboard-empty"><i class="fa fa-folder-open" aria-hidden="true"></i><h3>{% if not valid_filters %}Check your filters{% else %}No matching cases{% endif %}</h3><p>{% if not valid_filters %}Correct the highlighted filters above to see your cases.{% else %}Try another summary or reset the filters to see more cases.{% endif %}</p><a href="{% url 'portal:dashboard' %}">Reset filters</a></div>{% endif %}
+  </section>
+  <section class="card" aria-labelledby="age-heading">
+    <div class="section-heading"><div><h2 id="age-heading">Not-started ageing</h2><p>Oldest 10 of {{ not_started_count }} accepted or assigned cases where action has not started.</p></div><span class="chart-icon"><i class="fa fa-clock" aria-hidden="true"></i></span></div>
+    <div class="table-wrap"><table class="data-table dashboard-table"><thead><tr><th scope="col">Case</th><th scope="col">Priority</th><th scope="col">Authority</th><th scope="col">Submitted</th><th scope="col">Age in days</th></tr></thead><tbody>{% for case in ageing %}<tr><td><a class="case-reference" href="{% url 'incidents:detail' case.pk %}">{{ case.case_number }}</a><span class="case-title">{{ case.title|default:case.description|truncatechars:70 }}</span></td><td><span class="priority-badge priority-{{ case.priority }}">{{ case.get_priority_display }}</span></td><td>{{ case.authority|default:"Unassigned" }}</td><td>{{ case.created_at|date:"d M Y" }}</td><td><span class="age-badge{% if case.age_days >= 7 %} age-alert{% endif %}">{{ case.age_days }} days</span></td></tr>{% empty %}<tr><td colspan="5" class="dashboard-empty">No not-started cases in this selection.</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+  {% if staff_dashboard %}<section class="card" aria-labelledby="authority-heading"><div class="section-heading"><div><h2 id="authority-heading">Authority workload</h2><p>Top 10 by pending workload. Select an authority to explore its cases.</p></div></div><div class="table-wrap"><table class="data-table dashboard-table"><thead><tr><th scope="col">Authority</th><th scope="col">Total</th><th scope="col">Pending</th><th scope="col">Assigned</th><th scope="col">In progress</th><th scope="col">Not started</th><th scope="col">Average pending age</th></tr></thead><tbody>{% for row in authority_rows %}<tr><td>{% if row.url %}<a href="{{ row.url }}">{{ row.authority__name }}</a>{% else %}Unassigned{% endif %}</td><td>{{ row.total }}</td><td><strong>{{ row.pending }}</strong></td><td>{{ row.assigned }}</td><td>{{ row.in_progress }}</td><td>{{ row.not_started }}</td><td>{% if row.average_age_days != None %}{{ row.average_age_days }} days{% else %}—{% endif %}</td></tr>{% empty %}<tr><td colspan="7" class="dashboard-empty">No authority workload for these filters.</td></tr>{% endfor %}</tbody></table></div></section>{% endif %}
+  <details class="dashboard-definitions"><summary>How these indicators are calculated</summary><p>Attempted cases have been reviewed or moved beyond submission. Not attempted cases have no review date and remain submitted (including legacy routing states). Open includes solved cases awaiting closure and excludes closed or rejected cases. Not started includes accepted or assigned cases with no recorded action start. Age is elapsed days since submission; pending excludes solved, closed and rejected cases. Resolution rate includes solved and closed cases. Average resolution uses the solve date, or the close date where no solve date exists; no recorded completion is shown as “—”. Summary cards filter the case list; the form and chart links filter all reports.</p></details>
 </div>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/dashboard.js' %}" defer></script>{% endblock %}
