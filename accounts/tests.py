@@ -42,7 +42,7 @@ class RegistrationTests(TestCase):
         self.assertContains(response, "This field is required.")
 
     def test_successful_registration_redirects_to_login_without_authenticating(self):
-        Role.objects.create(name="Member")
+        Role.objects.create(name="Student", is_end_user_role=True)
 
         response = self.client.post(
             reverse("accounts:register"),

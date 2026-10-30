@@ -1,12 +1,12 @@
 {% extends "base_app.html" %}
 {% block content %}
-{% if notifications %}
+{% if page_obj.paginator.count %}
 <form method="post" class="toolbar">
   {% csrf_token %}
   <button type="submit" name="mark_all_read" class="btn btn-secondary btn-sm">Mark all read</button>
 </form>
 <div class="notification-list">
-  {% for note in notifications %}
+  {% for note in page_obj %}
   <article class="notification-item {% if not note.is_read %}unread{% endif %}">
     <div class="notification-body">
       <p>{{ note.message }}</p>
@@ -22,8 +22,8 @@
   </article>
   {% endfor %}
 </div>
+{% include "includes/list_pagination.html" %}
 {% else %}
-<div class="card">
   <p class="text-muted">No notifications yet.</p>
 </div>
 {% endif %}

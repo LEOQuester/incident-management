@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -9,9 +11,12 @@ def health(request):
     return JsonResponse({"status": "ok"})
 
 
+from accounts.landing import get_post_login_url
+
+
 def root_redirect(request):
     if request.user.is_authenticated:
-        return redirect("portal:dashboard")
+        return redirect(get_post_login_url(request.user))
     return redirect("accounts:login")
 
 
@@ -62,5 +67,8 @@ urlpatterns = [
     path("", include("portal.urls")),
     path("home/", root_redirect, name="home"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Evidence is served only by authenticated incidents attachment endpoints.

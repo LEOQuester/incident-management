@@ -1,0 +1,15 @@
+<div class="social-post-info{% if info_class %} {{ info_class }}{% endif %}" data-post-info>
+  <button type="button" class="social-post-info-trigger" aria-expanded="false" aria-label="Show status and priority">
+    <i class="fa fa-circle-info" aria-hidden="true"></i>
+  </button>
+  <div class="social-post-info-panel" role="region" aria-label="Status and priority">
+    <div class="social-post-info-row">
+      <span class="social-post-info-label">Status</span>
+      <span class="status-pill status-{{ incident.status }}">{{ incident.get_status_display }}</span>
+    </div>
+    <div class="social-post-info-row">
+      <span class="social-post-info-label">Priority</span>
+      <span class="priority-badge priority-{{ incident.priority }}">{% if incident.priority == 'urgent' %}<i class="fa fa-bolt" aria-hidden="true"></i> {% endif %}{{ incident.get_priority_display }}</span>
+    </div>
+  </div>
+</div>

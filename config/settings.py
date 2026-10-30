@@ -161,7 +161,7 @@ WHITENOISE_MANIFEST_STRICT = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "accounts:login"
-LOGIN_REDIRECT_URL = "portal:dashboard"
+LOGIN_REDIRECT_URL = "incidents:report"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 PHONENUMBER_DEFAULT_REGION = "LK"
@@ -183,7 +183,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
 INCIDENT_DESCRIPTION_MAX_LENGTH = 2000
-INCIDENT_MAX_PHOTOS = 5
+INCIDENT_MAX_PHOTOS = 4
 INCIDENT_PHOTO_MAX_BYTES = 5 * 1024 * 1024
 INCIDENT_ALLOWED_IMAGE_TYPES = {
     "image/jpeg",
@@ -201,6 +201,8 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True").lower() in ("1", "true", "yes")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@localhost")
 EMAIL_TIMEOUT = 10
-INCIDENT_VIDEO_MAX_BYTES = int(os.environ.get("INCIDENT_VIDEO_MAX_BYTES", str(25 * 1024 * 1024)))
+INCIDENT_VIDEO_MAX_BYTES = int(
+    os.environ.get("INCIDENT_VIDEO_MAX_BYTES", str(INCIDENT_PHOTO_MAX_BYTES))
+)
 INCIDENT_VIDEO_MAX_SECONDS = int(os.environ.get("INCIDENT_VIDEO_MAX_SECONDS", "120"))
 FFPROBE_PATH = os.environ.get("FFPROBE_PATH", "ffprobe")

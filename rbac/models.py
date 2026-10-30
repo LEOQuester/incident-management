@@ -45,6 +45,14 @@ class Permission(models.Model):
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    authority = models.ForeignKey(
+        "incidents.Authority",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="unit_roles",
+        help_text="When set, users with this role handle cases assigned to this authority unit.",
+    )
     is_end_user_role = models.BooleanField(
         default=False,
         help_text="End-user roles (e.g. Member) are excluded from AI incident routing.",

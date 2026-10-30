@@ -1,6 +1,6 @@
 # SRS implementation
 
-The main dashboard at `/` provides interactive case summaries, status/category drill-downs, a searchable and sortable case list, CSV export, resolution performance, not-started ageing, and staff authority workload. It uses the existing case visibility rules: reporters see their own cases, authority members with `update_cases` also see their assigned cases, and users with `manage_cases` or `view_reports` see all cases. Operational and management reports remain available at `/incidents/queue/`.
+The main dashboard at `/` provides interactive case summaries, status/category drill-downs, a searchable and sortable case list, CSV export, resolution performance, not-started ageing, and staff authority workload. It uses the existing case visibility rules: reporters see their own cases, authority members with `update_cases` also see their assigned cases, and users with `manage_cases` or `view_reports` see all cases. Operational and management reports use the **dashboard** at `/`. The legacy `/incidents/queue/` URL redirects there with the same filters.
 
 ## Interactive dashboard
 
@@ -16,7 +16,7 @@ AI routing no longer runs on submission, matching the SRS exclusion. Its old mod
 
 ## Roles and setup
 
-Run `python manage.py migrate`, then `python manage.py seed_rbac`. The seed command creates Student, Lecturer, Administrator, Relevant Authority, Faculty Management, and System Administrator roles. Existing custom assignments are retained; defaults for these roles are applied only on creation. Member remains compatible with existing accounts. Self-registration grants reporting access only; selecting Lecturer does not grant staff privileges. MC/CPM are mandatory for student registration and optional for lecturer registration.
+Run `python manage.py migrate`, then **`python manage.py seed_rbac`** (updates permission URLs/menus from `rbac/features.py`, roles, catalogs). The seed command also rewrites any legacy `incidents:queue` permission URLs to the dashboard. Self-registration grants reporting access only; MC/CPM are required for student registration and optional on admin-created accounts.
 
 Assign staff users to the appropriate role through existing user management. System administrators use **Authorities and Categories** to create authorities, enter officer contact details, and select member users. Authority membership and `update_cases` are both required for authority updates. Used authorities/categories are protected from deletion and can be deactivated instead. Management report access is read-only.
 

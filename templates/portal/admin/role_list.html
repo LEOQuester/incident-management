@@ -1,37 +1,60 @@
 {% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/admin-users.css' %}">{% endblock %}
+{% block page_header_class %}admin-users-compact-header{% endblock %}
 {% block content %}
-<div class="toolbar">
-  <a href="{% url 'portal:role_create' %}" class="btn btn-primary">New Role</a>
-</div>
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>End-user role</th>
-        <th>Permissions</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for role in roles %}
-      <tr>
-        <td>{{ role.name }}</td>
-        <td>{% if role.is_end_user_role %}Yes{% else %}No{% endif %}</td>
-        <td>
-          {% for perm in role.permissions.all %}
-          <span class="badge" title="{{ perm.codename }}">{{ perm.name }}</span>
-          {% empty %}—{% endfor %}
-        </td>
-        <td class="actions">
-          <a href="{% url 'portal:role_edit' role.pk %}">Edit</a>
-          <a href="{% url 'portal:role_delete' role.pk %}" class="danger">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4">No roles yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="admin-users-page admin-roles-page">
+  <section class="admin-users-intro" aria-label="Role list">
+    <span class="scope-chip"><i class="fa fa-user-shield" aria-hidden="true"></i> Access roles</span>
+    <span class="admin-users-meta">{{ page_obj.paginator.count }} role{{ page_obj.paginator.count|pluralize }}</span>
+    <div class="admin-users-actions">
+      <a href="{% url 'portal:role_create' %}" class="btn btn-primary btn-sm">
+        <i class="fa fa-plus" aria-hidden="true"></i> New role
+      </a>
+    </div>
+  </section>
+
+  <section class="card admin-users-panel">
+    <div class="table-wrap">
+      <table class="data-table admin-users-table admin-roles-table">
+        <thead>
+          <tr>
+            <th scope="col">Role</th>
+            <th scope="col">Permissions</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for role in page_obj %}
+          <tr>
+            <td class="admin-role-name-cell">
+              <a class="admin-user-link" href="{% url 'portal:role_edit' role.pk %}">{{ role.name }}</a>
+              {% if role.authority %}
+              <span class="admin-user-sub"><i class="fa fa-building" aria-hidden="true"></i> {{ role.authority.name }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="admin-role-chips">
+                {% for perm in role.permissions.all %}
+                <span class="profile-chip profile-chip-muted" title="{{ perm.codename }}">{{ perm.name }}</span>
+                {% empty %}
+                <span class="admin-users-muted">—</span>
+                {% endfor %}
+              </div>
+            </td>
+            <td class="actions admin-user-row-actions">
+              {% url 'portal:role_edit' role.pk as edit_url %}
+              {% url 'portal:role_delete' role.pk as delete_url %}
+              {% include "includes/list_row_actions.html" with edit_url=edit_url delete_url=delete_url %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="admin-users-empty">No roles yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "includes/list_pagination.html" %}
+  </section>
 </div>
 {% endblock %}

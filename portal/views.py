@@ -8,7 +8,9 @@ from rbac.decorators import permission_required
 from rbac.features import sync_permissions_to_database
 from rbac.forms import PermissionCreateForm, RoleForm, display_name_for_codename
 from rbac.portal_access import can_manage_permissions, can_view_permissions
+from incidents.access import QUEUE_ACCESS_CODENAMES
 from portal.dashboard import dashboard_context
+from portal.pagination import ADMIN_PAGE_SIZE, paginate
 from rbac.models import Permission, Role
 
 
@@ -19,8 +21,13 @@ def access_denied(request):
 
 
 @login_required
-@permission_required("view_dashboard")
 def dashboard(request):
+    capabilities = request.user.get_permission_codenames()
+    if "view_dashboard" not in capabilities and not (
+        capabilities & set(QUEUE_ACCESS_CODENAMES)
+    ):
+        messages.error(request, "You do not have permission to access this page.")
+        return redirect("portal:access_denied")
     context = dashboard_context(request)
     if not isinstance(context, dict):
         return context
@@ -33,12 +40,15 @@ def permission_list(request):
         messages.error(request, "You do not have permission to access this page.")
         return redirect("portal:access_denied")
     sync_permissions_to_database()
-    permissions = Permission.objects.all().order_by("sort_order", "name")
+    permissions = list(
+        Permission.objects.all().order_by("sort_order", "name")
+    )
     return render(
         request,
         "portal/admin/permission_list.html",
         {
             "permissions": permissions,
+            "permission_count": len(permissions),
             "page_title": "Permissions",
             "can_manage_permissions": can_manage_permissions(request.user),
         },
@@ -87,11 +97,22 @@ def permission_delete(request, pk):
 
 @permission_required("manage_roles")
 def role_list(request):
-    roles = Role.objects.prefetch_related("permissions")
+    page_obj, previous_url, next_url = paginate(
+        request,
+        Role.objects.select_related("authority")
+        .prefetch_related("permissions")
+        .order_by("name"),
+        per_page=ADMIN_PAGE_SIZE,
+    )
     return render(
         request,
         "portal/admin/role_list.html",
-        {"roles": roles, "page_title": "Roles"},
+        {
+            "page_obj": page_obj,
+            "previous_url": previous_url,
+            "next_url": next_url,
+            "page_title": "Roles",
+        },
     )
 
 
@@ -141,11 +162,22 @@ def role_delete(request, pk):
 
 @permission_required("manage_users")
 def user_list(request):
-    users = User.objects.prefetch_related("roles")
+    page_obj, previous_url, next_url = paginate(
+        request,
+        User.objects.prefetch_related("roles", "roles__authority").order_by(
+            "username"
+        ),
+        per_page=ADMIN_PAGE_SIZE,
+    )
     return render(
         request,
         "portal/admin/user_list.html",
-        {"users": users, "page_title": "Users"},
+        {
+            "page_obj": page_obj,
+            "previous_url": previous_url,
+            "next_url": next_url,
+            "page_title": "Users",
+        },
     )
 
 
@@ -153,19 +185,13 @@ def user_list(request):
 def user_create(request):
     form = AdminUserForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save(commit=False)
-        password = form.cleaned_data.get("password")
-        if password:
-            user.set_password(password)
-        else:
-            user.set_unusable_password()
-        user.save()
-        form.save_m2m()
+        form.save()
+        messages.success(request, "User created.")
         return redirect("portal:user_list")
     return render(
         request,
         "portal/admin/user_form.html",
-        {"form": form, "page_title": "Create User"},
+        {"form": form, "page_title": "New user", "is_create": True},
     )
 
 
@@ -175,11 +201,17 @@ def user_edit(request, pk):
     form = AdminUserForm(request.POST or None, instance=user)
     if request.method == "POST" and form.is_valid():
         form.save()
+        messages.success(request, "User updated.")
         return redirect("portal:user_list")
     return render(
         request,
         "portal/admin/user_form.html",
-        {"form": form, "page_title": "Edit User", "object": user},
+        {
+            "form": form,
+            "page_title": "Edit user",
+            "object": user,
+            "is_create": False,
+        },
     )
 
 

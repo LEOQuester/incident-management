@@ -1,9 +1,75 @@
 {% extends "base_app.html" %}
-{% block content %}
-<form method="post" enctype="multipart/form-data" class="card form-card">
-  {% csrf_token %}{{ form.as_p }}
-  {% if evidence %}<p><label>Evidence (up to 5 files; images 5 MiB, MP4/WebM videos 25 MiB and 120 seconds each by default)<input type="file" name="evidence" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"></label></p>{% endif %}
-  <button class="btn btn-primary" type="submit">Save</button>
-</form>
+{% load static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/fmsc.css' %}">
+<link rel="stylesheet" href="{% static 'css/case-update.css' %}">
 {% endblock %}
-{% block extra_js %}{% load static %}<script src="{% static 'js/evidence-upload.js' %}"></script>{% endblock %}
+{% block page_header_class %}visually-hidden{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block content %}
+<div class="case-update-page">
+  <section class="case-update-intro" aria-label="Update navigation">
+    <a href="{% url 'incidents:detail' form.instance.pk %}" class="case-update-back">
+      <i class="fa fa-arrow-left" aria-hidden="true"></i> Case
+    </a>
+    <span class="case-update-ref">{{ form.instance.case_number }}</span>
+  </section>
+
+  <form method="post" enctype="multipart/form-data" class="card case-update-card case-update-form" id="case-form" data-initial-status="{{ form.instance.status }}">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="report-layout case-update-layout{% if not evidence %} case-update-layout--solo{% endif %}">
+      <div class="case-update-main">
+        <div class="case-update-grid">
+          {% for field in form %}
+          {% if field.name != "comment" and field.name != "comment_type" %}
+          <div class="form-group case-update-field case-update-field--{{ field.name }}{% if field.errors %} has-error{% endif %}">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}<p class="case-update-hint">{{ field.help_text }}</p>{% endif %}
+            {{ field.errors }}
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="form-group case-update-field case-update-field--wide case-update-comment-block{% if form.comment.errors or form.comment_type.errors %} has-error{% endif %}">
+          <div class="case-update-comment-head">
+            <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
+            {% if form.comment_type %}
+            <div class="case-update-comment-type-wrap">
+              <label class="visually-hidden" for="{{ form.comment_type.id_for_label }}">{{ form.comment_type.label }}</label>
+              {{ form.comment_type }}
+            </div>
+            {% endif %}
+          </div>
+          <p class="case-update-hint case-update-comment-hint" id="case-comment-hint">
+            Normal: visible to the reporter. Internal: staff only. Resolution: marks the case solved and shows the outcome.
+          </p>
+          {{ form.comment }}
+          {{ form.comment.errors }}
+          {{ form.comment_type.errors }}
+        </div>
+      </div>
+
+      {% if evidence %}
+      <aside class="report-aside case-update-aside" aria-label="Completion evidence">
+        {% include "incidents/includes/evidence_upload.html" with incident=form.instance %}
+      </aside>
+      {% endif %}
+    </div>
+
+    <div class="case-update-actions">
+      <button class="btn btn-primary btn-sm" type="submit">Save</button>
+      <a class="btn btn-secondary btn-sm" href="{% url 'incidents:detail' form.instance.pk %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/evidence-upload.js' %}" defer></script>
+<script src="{% static 'js/case-update-comment.js' %}" defer></script>
+{% endblock %}

@@ -40,21 +40,95 @@ def notify_reviewers(incident):
 
 def reviewers():
     return User.objects.filter(is_active=True).filter(
-        Q(is_superuser=True) | Q(roles__permissions__codename="manage_cases")
+        roles__permissions__codename="manage_cases"
     ).distinct()
 
 
 def record_update(incident, actor, before, comment="", internal=False):
-    fields = ("status", "category_id", "priority", "authority_id", "resolution_note")
-    changes = {field: {"old": before[field], "new": getattr(incident, field)}
-               for field in fields if before[field] != getattr(incident, field)}
-    CaseUpdate.objects.create(incident=incident, actor=actor, comment=comment,
-                              internal=internal, changes=changes)
-    if "authority_id" in changes and incident.authority:
-        notify(incident.authority.members.all(), incident,
-               f"Case {incident.case_number} assigned to {incident.authority.name}: {incident.title}")
+    fields = (
+        "status",
+        "category_id",
+        "priority",
+        "authority_id",
+        "assignee_id",
+        "resolution_note",
+    )
+    changes = {
+        field: {"old": before[field], "new": getattr(incident, field)}
+        for field in fields
+        if before[field] != getattr(incident, field)
+    }
+    comment = (comment or "").strip()
+
+    if internal and changes:
+        CaseUpdate.objects.create(
+            incident=incident,
+            actor=actor,
+            comment="",
+            internal=False,
+            changes=changes,
+        )
+        if comment:
+            CaseUpdate.objects.create(
+                incident=incident,
+                actor=actor,
+                comment=comment,
+                internal=True,
+                changes={},
+            )
+    else:
+        CaseUpdate.objects.create(
+            incident=incident,
+            actor=actor,
+            comment=comment,
+            internal=internal,
+            changes=changes,
+        )
+    if "authority_id" in changes or "assignee_id" in changes:
+        recipients = []
+        if incident.assignee_id:
+            recipients.append(incident.assignee)
+        elif incident.authority and incident.authority.primary_contact_id:
+            recipients.append(incident.authority.primary_contact)
+        elif incident.authority:
+            recipients = list(incident.authority.staff_users())
+        if recipients:
+            action = "transferred to" if "authority_id" in changes else "assigned within"
+            unit = incident.authority.name if incident.authority else "a unit"
+            notify(
+                recipients,
+                incident,
+                f"Case {incident.case_number} {action} {unit}: {incident.title}",
+            )
     if "status" in changes:
         text = f"Case {incident.case_number}: {incident.get_status_display()}."
         if incident.status == "solved":
             text += f" Resolution: {incident.resolution_note}"
         notify([incident.reporter], incident, text)
+
+
+SUBMISSION_EDIT_FIELDS = (
+    "title",
+    "description",
+    "location",
+    "category_id",
+    "case_type",
+    "priority",
+)
+
+
+def record_submission_edit(incident, actor, before):
+    changes = {
+        field: {"old": before[field], "new": getattr(incident, field)}
+        for field in SUBMISSION_EDIT_FIELDS
+        if before[field] != getattr(incident, field)
+    }
+    if not changes:
+        return
+    CaseUpdate.objects.create(
+        incident=incident,
+        actor=actor,
+        comment="",
+        internal=False,
+        changes=changes,
+    )

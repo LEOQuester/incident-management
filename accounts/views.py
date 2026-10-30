@@ -6,6 +6,7 @@ from django.views.generic import CreateView
 from django.contrib.auth.decorators import login_required
 
 from accounts.forms import LoginForm, RegisterForm, ProfileForm
+from accounts.landing import get_post_login_url
 from rbac.models import Role
 
 
@@ -13,6 +14,14 @@ class UserLoginView(LoginView):
     template_name = "accounts/login.html"
     authentication_form = LoginForm
     redirect_authenticated_user = True
+
+    def get_success_url(self):
+        return get_post_login_url(self.request.user)
+
+    def get_redirect_url(self):
+        if self.redirect_authenticated_user and self.request.user.is_authenticated:
+            return get_post_login_url(self.request.user)
+        return super().get_redirect_url()
 
 
 class UserLogoutView(LogoutView):
@@ -26,15 +35,12 @@ class RegisterView(CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect("portal:dashboard")
+            return redirect(get_post_login_url(request.user))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        member_role = Role.objects.filter(name="Member").first()
-        if member_role:
-            self.object.roles.add(member_role)
-        role = Role.objects.filter(name="Lecturer" if self.object.user_type == "lecturer" else "Student").first()
+        role = Role.objects.filter(name="Student").first()
         if role:
             self.object.roles.add(role)
         messages.success(
@@ -46,9 +52,17 @@ class RegisterView(CreateView):
 
 @login_required
 def profile(request):
-    form = ProfileForm(request.POST or None, instance=request.user)
+    form = ProfileForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=request.user,
+    )
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Profile updated.")
         return redirect("accounts:profile")
-    return render(request, "accounts/profile.html", {"form": form, "page_title": "My Profile"})
+    return render(
+        request,
+        "accounts/profile.html",
+        {"form": form, "page_title": "My Profile"},
+    )

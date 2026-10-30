@@ -3,9 +3,11 @@ from datetime import timedelta
 from io import StringIO
 from urllib.parse import parse_qs, urlparse
 
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from io import StringIO
 
 from accounts.models import User
 from incidents.models import Authority, Category, Incident
@@ -15,21 +17,30 @@ from rbac.models import Permission, Role
 class DashboardTests(TestCase):
     @classmethod
     def setUpTestData(cls):
+        call_command("seed_rbac", stdout=StringIO())
         cls.student = User.objects.create_user(username="reporter", email="reporter@example.test")
         cls.other = User.objects.create_user(username="other", email="other@example.test")
-        cls.manager = User.objects.create_superuser(username="dashboard-admin", email="admin@example.test", password="test-only")
+        cls.manager = User.objects.create_user(
+            username="dashboard-admin", email="admin@example.test", password="test-only"
+        )
         cls.worker = User.objects.create_user(username="authority-worker", email="worker@example.test")
         cls.viewer = User.objects.create_user(username="management-viewer", email="viewer@example.test")
-        for user, codes in ((cls.student, ["view_dashboard"]), (cls.worker, ["view_dashboard", "update_cases"]), (cls.viewer, ["view_dashboard", "view_reports"])):
-            role = Role.objects.create(name=user.username)
+        cls.manager.roles.add(Role.objects.get(name="System Administrator"))
+        for user, codes in (
+            (cls.student, ["view_dashboard"]),
+            (cls.worker, ["view_dashboard", "update_allocated_cases"]),
+            (cls.viewer, ["view_dashboard", "view_reports"]),
+        ):
+            role = Role.objects.create(name=f"test-{user.username}")
             for code in codes:
-                permission, _ = Permission.objects.get_or_create(codename=code, defaults={"name": code})
-                role.permissions.add(permission)
+                role.permissions.add(Permission.objects.get(codename=code))
             user.roles.add(role)
         cls.category = Category.objects.create(name="IT dashboard category")
         cls.secret_category = Category.objects.create(name="Private classroom category")
         cls.authority = Authority.objects.create(name="IT dashboard authority")
-        cls.authority.members.add(cls.worker, cls.other)
+        worker_role = cls.worker.roles.first()
+        worker_role.authority = cls.authority
+        worker_role.save(update_fields=["authority"])
         cls.secret_authority = Authority.objects.create(name="Private authority")
         cls.now = timezone.now()
         cls.submitted = cls.make_case("Submitted projector", "submitted")
@@ -63,7 +74,9 @@ class DashboardTests(TestCase):
         self.assertEqual(counts["not_started"], 1)
         self.assertEqual(response.context["resolution_rate"], 33.3)
         self.assertEqual(response.context["average_resolution_days"], 7.0)
-        self.assertEqual([case.pk for case in response.context["ageing"]], [self.assigned.pk])
+        response = self.dashboard(focus="not_started")
+        self.assertEqual([case.pk for case in response.context["page_obj"]], [self.assigned.pk])
+        self.assertContains(response, "Not started")
         workload = next(row for row in response.context["authority_rows"] if row["authority_id"] == self.authority.pk)
         self.assertEqual(workload["pending"], 2)
         self.assertEqual(workload["average_age_days"], 10.0)
@@ -85,11 +98,9 @@ class DashboardTests(TestCase):
         response = self.dashboard(self.worker)
         self.assertEqual(response.context["total"], 2)
         self.assertNotContains(response, "PRIVATE_CASE_TITLE")
-        # Reporter also belongs to a multi-member authority; the OR membership
-        # join must not count their own cases twice.
+        # Reporter shares the worker's authority; cases must not be double-counted.
         role = self.worker.roles.first()
         self.student.roles.add(role)
-        self.authority.members.add(self.student)
         response = self.dashboard(self.student)
         self.assertEqual(response.context["total"], 5)
         self.assertEqual(response.context["average_resolution_days"], 7.0)
@@ -99,8 +110,8 @@ class DashboardTests(TestCase):
         self.assertEqual(response.context["total"], 1)
         self.assertEqual(len(response.context["status_rows"]), 1)
         self.assertEqual(response.context["authority_rows"][0]["total"], 1)
-        url = response.context["cards"][0]["url"]
-        params = parse_qs(urlparse(url).query)
+        status_url = response.context["status_rows"][0]["url"]
+        params = parse_qs(urlparse(status_url).query)
         self.assertEqual(params["priority"], ["urgent"])
         self.assertEqual(params["category"], [str(self.category.pk)])
 
@@ -123,7 +134,7 @@ class DashboardTests(TestCase):
     def test_pagination_search_sort_and_read_only_manager_access(self):
         for index in range(18):
             self.make_case(f"Searchable {index}", "submitted")
-        response = self.dashboard(self.viewer, q="Searchable", sort="oldest")
+        response = self.dashboard(self.viewer, q="Searchable")
         self.assertEqual(response.context["page_obj"].paginator.count, 18)
         self.assertEqual(len(response.context["page_obj"]), 15)
         self.assertIn("q=Searchable", response.context["next_url"])

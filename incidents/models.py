@@ -13,16 +13,42 @@ class Category(models.Model):
 
 class Authority(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    officer_name = models.CharField(max_length=150, blank=True)
-    designation = models.CharField(max_length=150, blank=True)
-    email = models.EmailField(blank=True)
-    phone = models.CharField(max_length=30, blank=True)
     unit = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="authorities")
+    primary_contact = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="primary_contact_for",
+        help_text="Designated contact person for this unit (must have a unit-scoped role).",
+    )
 
     def __str__(self):
         return self.name
+
+    @property
+    def contact_name(self) -> str:
+        if self.primary_contact_id:
+            return self.primary_contact.get_display_name()
+        return ""
+
+    @property
+    def contact_email(self) -> str:
+        if self.primary_contact_id and self.primary_contact.email:
+            return self.primary_contact.email
+        return ""
+
+    @property
+    def contact_phone(self) -> str:
+        if self.primary_contact_id and self.primary_contact.phone:
+            return str(self.primary_contact.phone)
+        return ""
+
+    def staff_users(self):
+        from accounts.models import User
+
+        return User.objects.filter(roles__authority=self, is_active=True).distinct()
 
 
 class Incident(models.Model):
@@ -54,6 +80,13 @@ class Incident(models.Model):
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.PROTECT)
     location = models.CharField(max_length=200, blank=True)
     authority = models.ForeignKey(Authority, null=True, blank=True, on_delete=models.PROTECT, related_name="cases")
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assigned_cases",
+    )
     resolution_note = models.TextField(blank=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
@@ -99,6 +132,11 @@ class Incident(models.Model):
 
     def __str__(self) -> str:
         return f"Incident #{self.pk} by {self.reporter.username}"
+
+    def submission_evidence_count(self) -> int:
+        return (
+            self.attachments.filter(is_completion=False).count() + self.photos.count()
+        )
 
 
 class IncidentPhoto(models.Model):

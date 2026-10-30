@@ -17,15 +17,21 @@
       <span class="notification-badge">{{ unread_notification_count }}</span>
       {% endif %}
     </a>
-    <span class="user-name"><i class="fa fa-user-circle"></i> {{ user.get_display_name }}</span>
+    <span class="user-name">
+      {% include "includes/user_identity.html" with user=user size="xs" inline=True %}
+    </span>
     <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
       {% csrf_token %}
       <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
     </form>
   </div>
 </header>
+<button type="button" class="sidebar-toggle" aria-expanded="false" aria-controls="app-sidebar" aria-label="Open menu">
+  <i class="fa fa-bars" aria-hidden="true"></i>
+</button>
 <div class="layout">
-  <aside class="sidebar">
+  <div class="sidebar-backdrop" aria-hidden="true"></div>
+  <aside class="sidebar" id="app-sidebar">
     <div class="sidebar-section">
       <p class="sidebar-heading">Menu</p>
       <nav>
@@ -67,10 +73,11 @@
       {% endfor %}
     </div>
     {% endif %}
-    <div class="page-header">
-      <h1>{{ page_title }}</h1>
+    <div class="page-header {% block page_header_class %}{% endblock %}">
+      <h1>{% block page_title %}{{ page_title }}{% endblock %}</h1>
     </div>
     {% block content %}{% endblock %}
   </main>
 </div>
+<script src="{% static 'js/app-shell.js' %}" defer></script>
 {% endblock %}

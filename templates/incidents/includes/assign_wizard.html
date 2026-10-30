@@ -1,0 +1,56 @@
+<div class="assign-wizard-root" id="assign-wizard-root" hidden aria-hidden="true">
+  <div class="assign-wizard-backdrop" data-assign-dismiss></div>
+  <div
+    class="assign-wizard-dialog card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="assign-wizard-title"
+    tabindex="-1"
+  >
+    <header class="assign-wizard-header">
+      <div>
+        <p class="assign-wizard-kicker">Assign case</p>
+        <h2 id="assign-wizard-title" class="assign-wizard-title">—</h2>
+      </div>
+      <button type="button" class="assign-wizard-close" data-assign-dismiss aria-label="Close">
+        <i class="fa fa-xmark" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <ol class="assign-wizard-steps" aria-label="Assignment steps">
+      <li class="is-active" data-step-marker="1"><span>Authority</span></li>
+      <li data-step-marker="2"><span>Person</span></li>
+      <li data-step-marker="3"><span>Confirm</span></li>
+    </ol>
+
+    <div class="assign-wizard-body">
+      <p class="assign-wizard-error alert alert-error" role="alert" hidden data-assign-error></p>
+
+      <section class="assign-wizard-panel is-active" data-assign-step="1">
+        <label class="assign-wizard-search-label" for="assign-authority-search">Search authorities</label>
+        <input type="search" id="assign-authority-search" class="form-control" placeholder="Authority name…" autocomplete="off">
+        <ul class="assign-wizard-list" data-assign-authority-list></ul>
+      </section>
+
+      <section class="assign-wizard-panel" data-assign-step="2" hidden>
+        <p class="assign-wizard-panel-lead">Choose responsible person at <strong data-assign-authority-label>—</strong></p>
+        <ul class="assign-wizard-list assign-wizard-list--people" data-assign-user-list></ul>
+      </section>
+
+      <section class="assign-wizard-panel" data-assign-step="3" hidden>
+        <dl class="assign-wizard-summary">
+          <div><dt>Authority</dt><dd data-assign-summary-authority>—</dd></div>
+          <div><dt>Responsible person</dt><dd data-assign-summary-person>—</dd></div>
+        </dl>
+        <label for="assign-comment">Note for activity log <span class="assign-wizard-optional">(optional)</span></label>
+        <textarea id="assign-comment" class="form-control" rows="2" maxlength="5000" placeholder="Add a short note…"></textarea>
+      </section>
+    </div>
+
+    <footer class="assign-wizard-footer">
+      <button type="button" class="btn btn-secondary btn-sm" data-assign-back hidden>Back</button>
+      <button type="button" class="btn btn-primary btn-sm" data-assign-next disabled>Next</button>
+      <button type="button" class="btn btn-primary btn-sm" data-assign-submit hidden>Assign case</button>
+    </footer>
+  </div>
+</div>

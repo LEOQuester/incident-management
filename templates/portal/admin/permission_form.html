@@ -1,8 +1,10 @@
 {% extends "base_app.html" %}
 {% block content %}
 <p class="page-lead">
-  Enter a permission code only. Assign it to roles on the Roles page; developers wire
-  features, menus, and URLs in code.
+  Add a <strong>custom</strong> permission code only. Built-in codes such as
+  <code>manage_cases</code> are created automatically from application features—search for them on the
+  <a href="{% url 'portal:permission_list' %}">Permissions</a> list, then assign them on
+  <a href="{% url 'portal:role_list' %}">Roles</a>.
 </p>
 <form method="post" class="card form-card">
   {% csrf_token %}

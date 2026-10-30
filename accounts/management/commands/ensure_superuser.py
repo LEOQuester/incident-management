@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from accounts.superuser_env import get_superuser_config
+from rbac.superuser_access import assign_system_administrator_role
 
 
 class Command(BaseCommand):
@@ -9,7 +11,8 @@ class Command(BaseCommand):
         "Create or update the admin superuser from .env / environment variables. "
         "Set DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_PASSWORD, and optionally "
         "DJANGO_SUPERUSER_EMAIL and DJANGO_SUPERUSER_PHONE. Runs on each deploy "
-        "when those variables are present."
+        "when those variables are present. Always runs seed_rbac and attaches the "
+        "System Administrator role (Users, Roles, Permissions, etc.)."
     )
 
     def handle(self, *args, **options):
@@ -24,6 +27,8 @@ class Command(BaseCommand):
                 "DJANGO_SUPERUSER_PASSWORD in .env (or Railway variables)."
             )
             return
+
+        call_command("seed_rbac")
 
         User = get_user_model()
         username = config["username"]
@@ -49,9 +54,21 @@ class Command(BaseCommand):
         user.set_password(config["password"])
         user.save()
 
+        if not assign_system_administrator_role(user):
+            raise CommandError(
+                "System Administrator role is missing after seed_rbac. "
+                "Check rbac seed output and try again."
+            )
+
         if created:
             self.stdout.write(self.style.SUCCESS(f"Superuser '{username}' created."))
         else:
             self.stdout.write(
                 self.style.SUCCESS(f"Superuser '{username}' updated from .env.")
             )
+        self.stdout.write(
+            self.style.SUCCESS(
+                "System Administrator role assigned (manage_users, manage_roles, "
+                "manage_permissions, view_permissions, and all app features)."
+            )
+        )

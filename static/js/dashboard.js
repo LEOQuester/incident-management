@@ -1,15 +1,35 @@
 (function () {
   "use strict";
-  var sort = document.getElementById("id_sort");
-  if (sort) {
-    sort.addEventListener("change", function () {
-      var url = new URL(window.location.href);
-      if (sort.value) url.searchParams.set("sort", sort.value);
-      else url.searchParams.delete("sort");
-      url.searchParams.delete("page");
-      url.searchParams.delete("export");
-      url.hash = "case-list";
-      window.location.assign(url.toString());
+
+  var form = document.getElementById("dashboard-filters");
+  if (form) {
+    var debounceTimer;
+
+    function submitFilters() {
+      if (typeof form.requestSubmit === "function") {
+        form.requestSubmit();
+      } else {
+        form.submit();
+      }
+    }
+
+    form.querySelectorAll("select, input[type='date']").forEach(function (field) {
+      field.addEventListener("change", submitFilters);
     });
+
+    var search = form.querySelector("input[name='q']");
+    if (search) {
+      search.addEventListener("input", function () {
+        window.clearTimeout(debounceTimer);
+        debounceTimer = window.setTimeout(submitFilters, 400);
+      });
+      search.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          window.clearTimeout(debounceTimer);
+          submitFilters();
+        }
+      });
+    }
   }
 })();

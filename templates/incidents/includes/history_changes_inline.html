@@ -1,0 +1,11 @@
+{% load incident_media %}
+{% for field, change in update.changes.items %}
+{% if field != "resolution_note" %}
+<span class="case-detail-event-change">
+  <span class="change-label">{{ field|change_field_label }}</span>
+  <span class="change-old">{{ change.old|change_value_display:field }}</span>
+  <span class="change-arrow" aria-hidden="true">→</span>
+  <span class="change-new">{{ change.new|change_value_display:field }}</span>
+</span>
+{% endif %}
+{% endfor %}

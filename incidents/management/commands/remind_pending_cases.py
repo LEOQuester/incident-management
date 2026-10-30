@@ -21,7 +21,7 @@ class Command(BaseCommand):
             if case.notifications.filter(message=message, created_at__date=timezone.localdate()).exists():
                 continue
             if case.authority and case.authority.is_active:
-                notify(case.authority.members.all(), case, message)
+                notify(case.authority.staff_users(), case, message)
             else:
                 notify(reviewers(), case, message)
             count += 1

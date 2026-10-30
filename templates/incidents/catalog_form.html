@@ -1,0 +1,62 @@
+{% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block page_header_class %}catalog-compact-header{% endblock %}
+{% block content %}
+<div class="catalog-page catalog-form-page">
+  <section class="catalog-intro" aria-label="Form navigation">
+    <a href="{% if kind == 'authorities' %}{% url 'incidents:catalog_authorities' %}{% else %}{% url 'incidents:catalog_categories' %}{% endif %}" class="catalog-back"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back to list</a>
+  </section>
+
+  <form method="post" class="card catalog-form-card">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% if kind == 'authorities' %}
+    <div class="catalog-form-grid catalog-form-grid--single">
+      <div class="form-group{% if form.name.errors %} has-error{% endif %}">
+        <label for="{{ form.name.id_for_label }}">Name</label>
+        {{ form.name }}
+        {{ form.name.errors }}
+      </div>
+      <div class="form-group catalog-form-check{% if form.is_active.errors %} has-error{% endif %}">
+        <label for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+        {{ form.is_active }}
+        {{ form.is_active.errors }}
+      </div>
+    </div>
+    {% if object.pk and staff_users %}
+    <div class="catalog-staff-block">
+      <p class="catalog-staff-label">Users with roles for this authority</p>
+      <div class="catalog-staff-chips">
+        {% for u in staff_users %}
+        {% include "includes/user_identity.html" with user=u size="xs" %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="catalog-form-grid catalog-form-grid--single">
+      <div class="form-group{% if form.name.errors %} has-error{% endif %}">
+        <label for="{{ form.name.id_for_label }}">Name</label>
+        {{ form.name }}
+        {{ form.name.errors }}
+      </div>
+      <div class="form-group catalog-form-check{% if form.is_active.errors %} has-error{% endif %}">
+        <label for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+        {{ form.is_active }}
+        {{ form.is_active.errors }}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="catalog-form-actions">
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      <a href="{% url 'incidents:catalog' kind %}" class="btn btn-secondary btn-sm">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

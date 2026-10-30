@@ -1,24 +1,99 @@
 {% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/admin-users.css' %}">{% endblock %}
+{% block page_header_class %}admin-users-compact-header{% endblock %}
 {% block content %}
-<form method="post" class="card form-card" id="user-form">
-  {% csrf_token %}
-  {% for field in form %}
-  <div class="form-group">
-    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-    {{ field }}
-    {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
-    {{ field.errors }}
-  </div>
-  {% endfor %}
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{% url 'portal:user_list' %}" class="btn btn-secondary">Cancel</a>
-  </div>
-</form>
+<div class="admin-users-page admin-user-form-page">
+  <section class="admin-users-intro" aria-label="Form navigation">
+    <a href="{% url 'portal:user_list' %}" class="admin-users-back"><i class="fa fa-arrow-left" aria-hidden="true"></i> All users</a>
+    {% if object %}
+    <span class="admin-users-meta">@{{ object.username }}</span>
+    {% endif %}
+  </section>
+
+  <form method="post" class="card admin-user-form-card admin-user-form--compact" id="user-form" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error admin-user-form-alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <p class="admin-user-form-kicker">Account &amp; profile</p>
+    <div class="admin-user-form-grid">
+      <div class="form-group{% if form.username.errors %} has-error{% endif %}">
+        <label for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div class="form-group{% if form.password.errors %} has-error{% endif %}">
+        <label for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {% if form.password.help_text %}<p class="admin-user-form-hint">{{ form.password.help_text }}</p>{% endif %}
+        {{ form.password.errors }}
+      </div>
+      <div class="form-group{% if form.email.errors %} has-error{% endif %}">
+        <label for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      <div class="form-group{% if form.phone.errors %} has-error{% endif %}">
+        <label for="{{ form.phone.id_for_label }}">Phone</label>
+        <div class="phone-input-wrap">{{ form.phone }}</div>
+        {{ form.phone.errors }}
+      </div>
+      <div class="form-group{% if form.first_name.errors %} has-error{% endif %}">
+        <label for="{{ form.first_name.id_for_label }}">First name</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+      <div class="form-group{% if form.last_name.errors %} has-error{% endif %}">
+        <label for="{{ form.last_name.id_for_label }}">Last name</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+      <div class="form-group{% if form.department.errors %} has-error{% endif %}">
+        <label for="{{ form.department.id_for_label }}">Department</label>
+        {{ form.department }}
+        {{ form.department.errors }}
+      </div>
+      <div class="form-group{% if form.mc_number.errors %} has-error{% endif %}">
+        <label for="{{ form.mc_number.id_for_label }}">MC number</label>
+        {{ form.mc_number }}
+        {{ form.mc_number.errors }}
+      </div>
+      <div class="form-group{% if form.cpm_number.errors %} has-error{% endif %}">
+        <label for="{{ form.cpm_number.id_for_label }}">CPM number</label>
+        {{ form.cpm_number }}
+        {{ form.cpm_number.errors }}
+      </div>
+    </div>
+
+    <div class="admin-user-form-access">
+      <div class="admin-user-form-access-head">
+        <p class="admin-user-form-kicker">Access</p>
+        <label class="admin-user-form-active{% if form.is_active.errors %} has-error{% endif %}">
+          {{ form.is_active }}
+          <span>Active account</span>
+        </label>
+        {{ form.is_active.errors }}
+      </div>
+      <div class="form-group admin-role-picker{% if form.roles.errors %} has-error{% endif %}">
+        <label for="{{ form.roles.id_for_label }}">{{ form.roles.label }}</label>
+        {% if form.roles.help_text %}<p class="admin-user-form-hint">{{ form.roles.help_text }}</p>{% endif %}
+        <div class="admin-role-checkboxes">{{ form.roles }}</div>
+        {{ form.roles.errors }}
+      </div>
+    </div>
+
+    <div class="admin-form-actions">
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      <a href="{% url 'portal:user_list' %}" class="btn btn-secondary btn-sm">Cancel</a>
+    </div>
+  </form>
+</div>
 {% endblock %}
 {% block extra_js %}
 <script>
-document.getElementById('user-form')?.addEventListener('submit', function () {
+document.getElementById("user-form")?.addEventListener("submit", function () {
   window.fmscSyncPhoneInputs(this);
 });
 </script>

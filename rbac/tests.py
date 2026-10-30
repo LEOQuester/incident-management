@@ -3,6 +3,8 @@ from django.test import TestCase
 from accounts.models import User
 from django.urls import reverse
 
+from rbac.features import build_sidebar_items, sync_permissions_to_database
+
 
 class PermissionRedirectTests(TestCase):
     def test_user_without_dashboard_permission_is_not_redirected_in_a_loop(self):

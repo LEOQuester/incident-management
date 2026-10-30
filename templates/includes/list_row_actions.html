@@ -1,0 +1,6 @@
+{% if edit_url %}
+<a href="{{ edit_url }}" class="list-action-icon" title="{{ edit_label|default:'Edit' }}" aria-label="{{ edit_label|default:'Edit' }}"><i class="fa fa-pen" aria-hidden="true"></i></a>
+{% endif %}
+{% if delete_url %}
+<a href="{{ delete_url }}" class="list-action-icon list-action-icon--danger" title="{{ delete_label|default:'Delete' }}" aria-label="{{ delete_label|default:'Delete' }}"><i class="fa fa-trash" aria-hidden="true"></i></a>
+{% endif %}

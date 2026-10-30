@@ -6,7 +6,7 @@
     {% csrf_token %}
     <div class="form-actions">
       <button type="submit" class="btn btn-danger">Delete</button>
-      <a href="{% url cancel_url %}" class="btn btn-secondary">Cancel</a>
+      <a href="{% if cancel_url_kind %}{% url cancel_url cancel_url_kind %}{% else %}{% url cancel_url %}{% endif %}" class="btn btn-secondary">Cancel</a>
     </div>
   </form>
 </div>

@@ -22,10 +22,48 @@ class AppFeature:
 # Order in this list is the sidebar menu order.
 APP_FEATURES: tuple[AppFeature, ...] = (
     AppFeature("view_profile", "View Own Profile", "accounts:profile", "My Profile", "fa-user"),
-    AppFeature("manage_cases", "Review and Assign Cases", "incidents:queue", "Case Management", "fa-list-check"),
-    AppFeature("update_cases", "Update Assigned Cases", "incidents:queue", "Authority Work Queue", "fa-tasks"),
-    AppFeature("view_reports", "View Management Reports", "incidents:queue", "Management Reports", "fa-chart-bar"),
-    AppFeature("manage_catalogs", "Manage Authorities and Categories", "incidents:catalog_home", "Authorities and Categories", "fa-building", menu_section="admin"),
+    AppFeature(
+        "manage_cases",
+        "Review and Assign Cases",
+        "portal:dashboard",
+        "Cases & reports",
+        "fa-list-check",
+        show_in_menu=False,
+    ),
+    AppFeature(
+        "view_allocated_cases",
+        "View Unit-Assigned Cases",
+        "portal:dashboard",
+        "Cases & reports",
+        "fa-list-check",
+        show_in_menu=False,
+    ),
+    AppFeature(
+        "update_allocated_cases",
+        "Update Unit-Assigned Cases",
+        "portal:dashboard",
+        "Cases & reports",
+        "fa-list-check",
+        show_in_menu=False,
+    ),
+    AppFeature(
+        "transfer_case",
+        "Transfer Cases",
+        "portal:dashboard",
+        "Cases & reports",
+        "fa-list-check",
+        show_in_menu=False,
+    ),
+    AppFeature(
+        "view_reports",
+        "View Management Reports",
+        "portal:dashboard",
+        "Cases & reports",
+        "fa-list-check",
+        show_in_menu=False,
+    ),
+    AppFeature("manage_authorities", "Manage Authorities", "incidents:catalog_authorities", "Authorities", "fa-building", menu_section="admin"),
+    AppFeature("manage_categories", "Manage Categories", "incidents:catalog_categories", "Categories", "fa-tags", menu_section="admin"),
     AppFeature(
         codename="view_dashboard",
         name="View Dashboard",
@@ -111,11 +149,15 @@ def build_sidebar_items(
         menu_section=section,
         codename__in=allowed_codenames,
     ).exclude(url_name="").order_by("sort_order", "name")
+    seen_urls: set[str] = set()
     for perm in permissions:
         try:
             url = reverse(perm.url_name)
         except NoReverseMatch:
             continue
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
         items.append(
             {
                 "label": perm.menu_label or perm.name,

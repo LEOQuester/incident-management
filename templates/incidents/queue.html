@@ -1,21 +1,200 @@
 {% extends "base_app.html" %}
+{% load static incident_media %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/queue.css' %}">
+{% endblock %}
+{% block page_header_class %}visually-hidden{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
 {% block content %}
-{% if user.is_superuser or 'manage_catalogs' in user.get_permission_codenames %}<p><a href="{% url 'incidents:catalog' 'authorities' %}">Manage authorities and categories</a></p>{% endif %}
-<form method="get" class="card">
-<p><label>Search <input name="q" value="{{ request.GET.q }}"></label>
-<label>From <input type="date" name="from" value="{{ request.GET.from }}"></label>
-<label>To <input type="date" name="to" value="{{ request.GET.to }}"></label></p>
-<p><label>Status <select name="status"><option value="">All</option>{% for value,label in statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
-<label>Priority <select name="priority"><option value="">All</option><option {% if request.GET.priority == 'urgent' %}selected{% endif %}>urgent</option><option {% if request.GET.priority == 'normal' %}selected{% endif %}>normal</option></select></label>
-<label>Type <select name="case_type"><option value="">All</option><option {% if request.GET.case_type == 'complaint' %}selected{% endif %}>complaint</option><option {% if request.GET.case_type == 'suggestion' %}selected{% endif %}>suggestion</option></select></label></p>
-<p><label>Category <select name="category"><option value="">All</option>{% for item in categories %}<option value="{{ item.pk }}" {% if request.GET.category == item.pk|stringformat:'s' %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label>
-<label>Authority <select name="authority"><option value="">All</option>{% for item in authorities %}<option value="{{ item.pk }}" {% if request.GET.authority == item.pk|stringformat:'s' %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></label></p>
-<button class="btn btn-primary">Apply filters</button> <button name="export" value="csv" class="btn btn-secondary">Export CSV</button>
-</form>
-{% for error in errors %}<p class="alert alert-error">{{ error }}</p>{% endfor %}
-<div class="card">{% for name,count in summary.items %}<p><strong>{{ name }}:</strong> {{ count }}</p>{% endfor %}</div>
-<div class="card table-wrap"><h2>Cases (latest 200; export includes all matches)</h2><table class="data-table"><thead><tr><th>Case</th><th>Title</th><th>Priority</th><th>Status</th><th>Authority</th><th>Age days</th></tr></thead><tbody>
-{% for case in cases %}<tr><td><a href="{% url 'incidents:detail' case.pk %}">{{ case.case_number }}</a></td><td>{{ case.title }}</td><td>{{ case.priority }}</td><td>{{ case.get_status_display }}</td><td>{{ case.authority|default:'Unassigned' }}</td><td>{{ case.age_days }}</td></tr>{% empty %}<tr><td colspan="6">No cases match.</td></tr>{% endfor %}</tbody></table></div>
-<div class="card"><h2>Not-started age report (oldest 100)</h2>{% for case in ageing %}<p><a href="{% url 'incidents:detail' case.pk %}">{{ case.case_number }}</a> â€” {{ case.title }} â€” {{ case.age_days }} days</p>{% empty %}<p>No not-started cases.</p>{% endfor %}</div>
-<div class="card"><h2>Authority-wise totals</h2>{% for row in authority_counts %}<p>{{ row.authority__name|default:'Unassigned' }}: {{ row.total }} total; {{ row.pending }} pending; {{ row.assigned }} assigned; {{ row.in_progress }} in progress; {{ row.not_started }} not started; {{ row.average_age }} average pending age (days)</p>{% endfor %}<h2>Category totals</h2>{% for row in category_counts %}<p>{{ row.category__name|default:'Uncategorised' }}: {{ row.total }}</p>{% endfor %}<h2>Complaint / suggestion totals</h2>{% for row in type_counts %}<p>{{ row.case_type }}: {{ row.total }}</p>{% endfor %}</div>
+<div class="case-queue">
+  <section class="dashboard-intro dashboard-intro-compact queue-intro" aria-label="Queue scope">
+    <span class="scope-chip"><i class="fa fa-list-check" aria-hidden="true"></i> {{ scope_label }}</span>
+    <span class="dashboard-performance-inline" aria-label="Resolution performance">
+      <span class="perf-item"><span class="perf-label">Resolution</span><strong>{{ resolution_rate }}<small>%</small></strong></span>
+      <span class="perf-item"><span class="perf-label">Avg close</span><strong>{% if average_resolution_days %}{{ average_resolution_days }}<small> d</small>{% else %}—{% endif %}</strong></span>
+    </span>
+    <div class="dashboard-actions">
+      <a href="{% url 'portal:dashboard' %}" class="btn btn-secondary btn-sm">Dashboard</a>
+      {% if can_manage_authorities %}
+      <a href="{% url 'incidents:catalog_authorities' %}" class="btn btn-secondary btn-sm">Authorities</a>
+      {% endif %}
+      {% if can_manage_categories %}
+      <a href="{% url 'incidents:catalog_categories' %}" class="btn btn-secondary btn-sm">Categories</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <nav class="queue-summary-strip" aria-label="Filtered totals">
+    {% for label, count in summary_strip %}
+    <span class="queue-summary-item"><span>{{ label }}</span><strong>{{ count }}</strong></span>
+    {% endfor %}
+  </nav>
+
+  <section class="card dashboard-filter-panel queue-filter-panel" aria-label="Report filters">
+    <form method="get" id="queue-filters" class="dashboard-filter-form">
+      <div class="dashboard-filter-toolbar">
+        <span class="dashboard-filter-title">Filters</span>
+        <span class="dashboard-filter-meta">{{ total }} matching case{{ total|pluralize }}</span>
+      </div>
+      {% for error in errors %}
+      <div class="alert alert-error queue-filter-error" role="alert">{{ error }}</div>
+      {% endfor %}
+      <div class="dashboard-filters queue-filters">
+        <div class="form-group dashboard-search">
+          <label for="queue-q">Search</label>
+          <input class="form-control" type="search" name="q" id="queue-q" value="{{ request.GET.q }}" placeholder="Title, description, case ID">
+        </div>
+        <div class="form-group">
+          <label for="queue-from">From</label>
+          <input class="form-control" type="date" name="from" id="queue-from" value="{{ request.GET.from }}">
+        </div>
+        <div class="form-group">
+          <label for="queue-to">To</label>
+          <input class="form-control" type="date" name="to" id="queue-to" value="{{ request.GET.to }}">
+        </div>
+        <div class="form-group">
+          <label for="queue-status">Status</label>
+          <select class="form-control" name="status" id="queue-status">
+            <option value="">All</option>
+            {% for value, label in statuses %}
+            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="queue-priority">Priority</label>
+          <select class="form-control" name="priority" id="queue-priority">
+            <option value="">All</option>
+            <option value="urgent" {% if request.GET.priority == 'urgent' %}selected{% endif %}>Urgent</option>
+            <option value="normal" {% if request.GET.priority == 'normal' %}selected{% endif %}>Normal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="queue-type">Type</label>
+          <select class="form-control" name="case_type" id="queue-type">
+            <option value="">All</option>
+            <option value="complaint" {% if request.GET.case_type == 'complaint' %}selected{% endif %}>Complaint</option>
+            <option value="suggestion" {% if request.GET.case_type == 'suggestion' %}selected{% endif %}>Suggestion</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="queue-category">Category</label>
+          <select class="form-control" name="category" id="queue-category">
+            <option value="">All</option>
+            {% for item in categories %}
+            <option value="{{ item.pk }}" {% if request.GET.category == item.pk|stringformat:'s' %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="queue-authority">Authority</label>
+          <select class="form-control" name="authority" id="queue-authority">
+            <option value="">All</option>
+            {% for item in authorities %}
+            <option value="{{ item.pk }}" {% if request.GET.authority == item.pk|stringformat:'s' %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="queue-filter-footer">
+        <button type="submit" name="export" value="csv" class="btn btn-secondary btn-sm">Export CSV</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="queue-main-grid">
+    <section class="card queue-panel" aria-labelledby="queue-cases-heading">
+      <div class="section-heading queue-section-heading">
+        <div>
+          <h2 id="queue-cases-heading">Cases</h2>
+          <p>{{ page_obj.paginator.count }} case{{ page_obj.paginator.count|pluralize }} · showing {{ page_obj.start_index }}–{{ page_obj.end_index }}</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table dashboard-table queue-table">
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Priority</th>
+              <th scope="col">Status</th>
+              <th scope="col">Authority</th>
+              <th scope="col">Age</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for case in page_obj %}
+            <tr>
+              <td>
+                {% include "incidents/includes/case_list_link.html" %}
+              </td>
+              <td><span class="priority-badge priority-{{ case.priority }}">{% if case.priority == 'urgent' %}<i class="fa fa-bolt" aria-hidden="true"></i> {% endif %}{{ case.get_priority_display }}</span></td>
+              <td><span class="status-pill status-{{ case.status }}">{{ case.get_status_display }}</span></td>
+              <td class="case-assignment-cell">{% include "incidents/includes/case_assignment_cell.html" %}</td>
+              <td class="nowrap"><span class="age-badge{% if case.age_days >= 7 %} age-alert{% endif %}">{{ case.age_days }}d</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="dashboard-empty">No cases match these filters.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "includes/list_pagination.html" %}
+    </section>
+
+    <div class="queue-side-stack">
+      <section class="card queue-panel" aria-labelledby="queue-auth-heading">
+        <div class="section-heading queue-section-heading">
+          <div>
+            <h2 id="queue-auth-heading">By authority</h2>
+            <p>Pending workload snapshot</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table dashboard-table queue-table queue-table-compact">
+            <thead>
+              <tr>
+                <th scope="col">Unit</th>
+                <th scope="col">Pend.</th>
+                <th scope="col">Avg age</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in authority_counts|slice:":8" %}
+              <tr>
+                <td>{{ row.authority__name|default:"Unassigned"|truncatechars:22 }}</td>
+                <td><strong>{{ row.pending }}</strong></td>
+                <td class="nowrap">{% if row.average_age %}{{ row.average_age }}d{% else %}—{% endif %}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="dashboard-empty">No data</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="card queue-panel queue-breakdown" aria-label="Category and type totals">
+    <div class="queue-chip-row">
+      <span class="queue-chip-label">Categories</span>
+      {% for row in category_counts %}
+      <span class="queue-stat-chip">{{ row.category__name|default:"Uncategorised" }} <strong>{{ row.total }}</strong></span>
+      {% empty %}<span class="queue-stat-chip muted">None</span>{% endfor %}
+    </div>
+    <div class="queue-chip-row">
+      <span class="queue-chip-label">Types</span>
+      {% for row in type_counts %}
+      <span class="queue-stat-chip">{{ row.case_type|capfirst }} <strong>{{ row.total }}</strong></span>
+      {% empty %}<span class="queue-stat-chip muted">None</span>{% endfor %}
+    </div>
+  </section>
+</div>
+{% if can_assign_cases %}
+{% include "incidents/includes/assign_wizard_assets.html" %}
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/queue.js' %}" defer></script>
 {% endblock %}

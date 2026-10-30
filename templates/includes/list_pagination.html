@@ -1,0 +1,9 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="dashboard-pagination list-pagination" aria-label="Pages">
+  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} total</span>
+  <div>
+    {% if previous_url %}<a class="btn btn-secondary btn-sm" href="{{ previous_url }}">Previous</a>{% endif %}
+    {% if next_url %}<a class="btn btn-secondary btn-sm" href="{{ next_url }}">Next</a>{% endif %}
+  </div>
+</nav>
+{% endif %}

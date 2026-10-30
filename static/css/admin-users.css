@@ -1,0 +1,404 @@
+.main-content:has(.admin-users-page) {
+  padding: 0.65rem 1.25rem 1rem;
+}
+
+.admin-users-compact-header {
+  margin-bottom: 0.35rem;
+}
+
+.admin-users-compact-header h1 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.admin-users-page {
+  max-width: 1280px;
+}
+
+.admin-users-intro {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-users-intro .scope-chip {
+  font-size: 0.68rem;
+  padding: 0.22rem 0.55rem;
+}
+
+.admin-users-meta {
+  font-size: 0.72rem;
+  color: #657080;
+}
+
+.admin-users-actions {
+  margin-left: auto;
+}
+
+.admin-users-actions .btn-sm {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.65rem;
+}
+
+.admin-users-back {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--usj-navy);
+  text-decoration: none;
+}
+
+.admin-users-back:hover {
+  text-decoration: underline;
+}
+
+.admin-users-panel,
+.admin-user-form-card {
+  padding: 0.5rem 0.65rem 0.65rem;
+  margin: 0;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 0.35rem 0.45rem;
+  font-size: 0.78rem;
+  vertical-align: top;
+}
+
+.admin-user-link {
+  font-weight: 700;
+  color: var(--usj-navy);
+}
+
+.admin-user-username {
+  min-width: 7rem;
+}
+
+.admin-user-sub {
+  display: block;
+  font-size: 0.68rem;
+  color: #657080;
+  margin-top: 0.08rem;
+}
+
+.admin-user-flag {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 0.02rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: rgba(139, 21, 56, 0.12);
+  color: var(--usj-maroon);
+  vertical-align: middle;
+}
+
+.admin-user-flag-muted {
+  background: #eef0f2;
+  color: #657080;
+}
+
+.admin-user-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.admin-user-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.4rem;
+}
+
+.admin-user-contact {
+  max-width: 14rem;
+  word-break: break-word;
+}
+
+.admin-role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+
+.admin-role-chips .profile-chip {
+  font-size: 0.62rem;
+  padding: 0.05rem 0.35rem;
+}
+
+.admin-users-muted {
+  color: #9ca3af;
+}
+
+.admin-user-row-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.admin-users-empty {
+  text-align: center;
+  color: #657080;
+  padding: 0.75rem !important;
+}
+
+.admin-form-section {
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.55rem;
+  border-bottom: 1px solid var(--fmsc-border);
+}
+
+.admin-form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.admin-form-section-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--usj-maroon-dark);
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 0.65rem;
+}
+
+.admin-form-grid--access {
+  grid-template-columns: 1fr 1fr;
+}
+
+.admin-user-form-page .form-group {
+  margin-bottom: 0.4rem;
+}
+
+.admin-user-form-page .form-group label {
+  font-size: 0.72rem;
+  margin-bottom: 0.12rem;
+}
+
+.admin-user-form-page .form-control {
+  padding: 0.32rem 0.45rem;
+  font-size: 0.8125rem;
+}
+
+.admin-form-flags-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.admin-flag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  padding-top: 0.15rem;
+}
+
+.admin-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin: 0;
+  cursor: pointer;
+}
+
+.admin-role-picker {
+  margin-top: 0.45rem;
+}
+
+.admin-role-checkboxes ul {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.35rem 0.5rem;
+}
+
+.admin-role-checkboxes li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-role-checkboxes label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin: 0;
+  cursor: pointer;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--fmsc-border);
+}
+
+/* Compact create / edit user form */
+.admin-user-form--compact {
+  padding: 0.55rem 0.75rem 0.65rem;
+  max-width: 920px;
+}
+
+.admin-user-form-alert {
+  margin-bottom: 0.45rem;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+.admin-user-form-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--usj-maroon-dark);
+}
+
+.admin-user-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem 0.55rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--fmsc-border);
+}
+
+.admin-user-form--compact .form-group {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.admin-user-form--compact .form-group label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #657080;
+  margin-bottom: 0.1rem;
+  line-height: 1.2;
+}
+
+.admin-user-form--compact .form-control-compact {
+  font-size: 0.72rem;
+  min-height: 0;
+  height: 1.85rem;
+  padding: 0.2rem 0.45rem;
+  line-height: 1.25;
+}
+
+.admin-user-form-hint {
+  margin: 0.12rem 0 0;
+  font-size: 0.62rem;
+  color: #8a93a0;
+  line-height: 1.3;
+}
+
+.admin-user-form-access {
+  margin-bottom: 0.15rem;
+}
+
+.admin-user-form-access-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-user-form-access-head .admin-user-form-kicker {
+  margin-bottom: 0;
+}
+
+.admin-user-form-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+}
+
+.admin-user-form-active input {
+  margin: 0;
+}
+
+.admin-user-form--compact .admin-role-picker {
+  margin-top: 0;
+}
+
+.admin-user-form--compact .admin-role-picker > label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #657080;
+  margin-bottom: 0.1rem;
+}
+
+.admin-user-form--compact .admin-role-checkboxes ul {
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.25rem 0.45rem;
+  margin-top: 0.15rem;
+}
+
+.admin-user-form--compact .admin-role-checkboxes label {
+  font-size: 0.72rem;
+}
+
+.admin-user-form--compact .admin-form-actions {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+.admin-roles-table .admin-role-name-cell {
+  min-width: 10rem;
+  max-width: 16rem;
+}
+
+.admin-roles-table .admin-role-chips .profile-chip {
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.admin-user-form--compact .errorlist {
+  font-size: 0.65rem;
+  margin: 0.1rem 0 0;
+}
+
+@media (max-width: 900px) {
+  .admin-user-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-form-grid,
+  .admin-form-grid--access {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,27 @@
+{% load incident_media %}
+<div class="case-assignment-stack">
+  {% if case.authority %}
+  <span class="case-assignment-unit">{{ case.authority.name }}</span>
+  {% if case.assignee %}
+  <span class="case-assignment-person">{{ case.assignee.get_display_name }}</span>
+  {% else %}
+  <span class="case-assignment-role case-assignment-role-muted">No person selected</span>
+  {% endif %}
+  {% else %}
+  <span class="case-assignment-empty">Unassigned</span>
+  {% endif %}
+
+  {% if can_assign_cases %}
+  {% if case.status != "closed" and case.status != "rejected" and case.status != "solved" %}
+  <button
+    type="button"
+    class="btn btn-link btn-assign-compact"
+    data-open-assign-wizard
+    data-case-id="{{ case.pk }}"
+    data-case-label="{{ case|case_list_label|truncatechars:60 }}"
+  >
+    {% if case.authority %}Edit assignment{% else %}Assign{% endif %}
+  </button>
+  {% endif %}
+  {% endif %}
+</div>

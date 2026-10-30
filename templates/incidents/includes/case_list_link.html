@@ -1,0 +1,8 @@
+{% load incident_media %}
+{% with label=case|case_list_label %}
+<a
+  class="case-reference"
+  href="{% url 'incidents:detail' case.pk %}"
+  title="{{ label }}"
+>{{ label }}</a>
+{% endwith %}

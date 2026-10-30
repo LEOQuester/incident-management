@@ -1,4 +1,9 @@
 {% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/admin-users.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin-permissions.css' %}">
+{% endblock %}
 {% block content %}
 <form method="post" class="card form-card">
   {% csrf_token %}
@@ -12,12 +17,20 @@
     </div>
     {% endif %}
   {% endfor %}
-  <div class="form-group permission-picker">
-    <label for="{{ form.permissions.id_for_label }}">{{ form.permissions.label }}</label>
+  <div class="form-group permission-picker permission-picker-searchable">
+    <label for="role-perm-search">Permissions</label>
     {% if form.permissions.help_text %}
     <p class="form-hint">{{ form.permissions.help_text }}</p>
     {% endif %}
-    <div class="permission-checkboxes">
+    <input
+      type="search"
+      id="role-perm-search"
+      class="form-control admin-perm-search-input"
+      data-perm-picker-search
+      placeholder="Filter by name or code…"
+      autocomplete="off"
+    >
+    <div class="permission-checkboxes permission-checkboxes-compact">
       {{ form.permissions }}
     </div>
     {{ form.permissions.errors }}
@@ -27,4 +40,5 @@
     <a href="{% url 'portal:role_list' %}" class="btn btn-secondary">Cancel</a>
   </div>
 </form>
+<script src="{% static 'js/admin-permission-picker.js' %}"></script>
 {% endblock %}

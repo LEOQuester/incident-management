@@ -9,8 +9,10 @@ logger = logging.getLogger(__name__)
 def _alertable_roles():
     from rbac.models import Role
 
+    # Route to authority unit staff roles only (not global admin/report roles).
     return list(
-        Role.objects.filter(is_end_user_role=False)
+        Role.objects.filter(is_end_user_role=False, authority__isnull=False)
+        .exclude(name="System Administrator")
         .order_by("name")
         .values("id", "name", "description")
     )

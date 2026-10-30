@@ -1,18 +1,201 @@
 {% extends "base_app.html" %}
+{% load static incident_media %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/case-detail.css' %}">
+{% endblock %}
+{% block page_header_class %}visually-hidden{% endblock %}
+{% block page_title %}{{ incident.case_number }}{% endblock %}
 {% block content %}
-<div class="card">
-<h2>{{ incident.case_number }} — {{ incident.title }}</h2>
-<p>{{ incident.get_case_type_display }} | {{ incident.get_priority_display }} | {{ incident.get_status_display }}</p>
-<p>Category: {{ incident.category|default:'Uncategorised' }} | Location: {{ incident.location }}</p>
-<p>Reporter: {{ incident.reporter.get_display_name }} | Submitted: {{ incident.created_at }} | Authority: {{ incident.authority|default:'Unassigned' }}</p>
-<p style="white-space:pre-wrap">{{ incident.description }}</p>
-{% if incident.resolution_note %}<h3>Resolution</h3><p>{{ incident.resolution_note }}</p>{% endif %}
-{% if can_update %}<a class="btn btn-primary" href="{% url 'incidents:update' incident.pk %}">Review / update case</a>{% endif %}
-<h3>Evidence</h3>
-{% for file in incident.attachments.all %}<p><a href="{% url 'incidents:attachment' file.pk %}">Download {% if file.is_completion %}completion {% endif %}evidence {{ forloop.counter }} ({{ file.content_type }})</a></p>{% endfor %}
-{% for photo in incident.photos.all %}<p><a href="{% url 'incidents:photo' photo.pk %}">Download original photo {{ forloop.counter }}</a></p>{% endfor %}
-<h3>Case history</h3>
-{% for update in updates %}<article><p>{{ update.created_at }} — {{ update.actor|default:'System' }} {% if update.internal %}(Internal){% endif %}</p><p>{{ update.comment }}</p>
-{% for field,change in update.changes.items %}{% if field != 'resolution_note' %}<p>{{ field }}: {{ change.old|default:'None' }} ? {{ change.new|default:'None' }}</p>{% endif %}{% endfor %}</article>{% endfor %}
+<div class="case-detail case-detail--feed">
+  <section class="case-detail-intro" aria-label="Case navigation">
+    <a href="{% url 'portal:dashboard' %}" class="case-detail-back"><i class="fa fa-arrow-left" aria-hidden="true"></i> Dashboard</a>
+    {% if can_update or can_edit_own %}
+    <div class="case-detail-intro-actions">
+      {% if can_edit_own %}
+      <a class="btn btn-secondary btn-sm" href="{% url 'incidents:edit' incident.pk %}"><i class="fa fa-pen" aria-hidden="true"></i> Edit submission</a>
+      {% endif %}
+      {% if can_update %}
+      <a class="btn btn-secondary btn-sm" href="{% url 'incidents:update' incident.pk %}"><i class="fa fa-pen-to-square" aria-hidden="true"></i> Update</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="case-detail-columns">
+    <div class="case-detail-post-col">
+  <article class="social-post card" aria-labelledby="case-post-heading">
+    <header class="social-post-header">
+      {% if not incident.attachments.all and not incident.photos.all %}
+      <span class="case-type-label case-type-label--header case-type-label--{{ incident.case_type }}">{{ incident.get_case_type_display }}</span>
+      {% include "incidents/includes/post_info_popover.html" with info_class="social-post-info--header" %}
+      {% endif %}
+      <div class="social-post-author">
+        {% include "includes/user_identity.html" with user=incident.reporter size="sm" %}
+      </div>
+      <div class="social-post-header-side">
+        {% if incident.category %}
+        <span class="social-post-place-tag"><i class="fa fa-tag" aria-hidden="true"></i> {{ incident.category }}</span>
+        {% endif %}
+        {% if incident.location %}
+        <span class="social-post-place-tag"><i class="fa fa-location-dot" aria-hidden="true"></i> {{ incident.location }}</span>
+        {% endif %}
+        <div class="social-post-dateline">
+          <time class="social-post-time" datetime="{{ incident.created_at|date:'c' }}">{{ incident.created_at|date:"d M Y, H:i" }}</time>
+          <span class="social-post-age">{{ incident.age_days }}d open</span>
+        </div>
+      </div>
+    </header>
+
+    {% if incident.attachments.all or incident.photos.all %}
+    <div class="social-post-media" data-social-carousel>
+      <div class="social-post-media-track" tabindex="0" role="region" aria-label="Case evidence">
+        {% for file in incident.attachments.all %}
+        <figure class="social-post-media-slide" data-download-url="{% url 'incidents:attachment' file.pk %}" data-download-label="{% if file.is_completion %}Download completion file{% else %}Download attachment{% endif %} {{ forloop.counter }}">
+          {% if file|previewable_attachment %}
+            {% if file|is_video_file %}
+            <video class="social-post-media-asset" controls playsinline preload="metadata" src="{% url 'incidents:attachment_preview' file.pk %}"></video>
+            {% else %}
+            <img class="social-post-media-asset" src="{% url 'incidents:attachment_preview' file.pk %}" alt="Evidence {{ forloop.counter }}" loading="lazy">
+            {% endif %}
+          {% else %}
+          <div class="social-post-media-file">
+            <i class="fa fa-file" aria-hidden="true"></i>
+            <span>{% if file.is_completion %}Completion file{% else %}Attachment{% endif %} {{ forloop.counter }}</span>
+            <a href="{% url 'incidents:attachment' file.pk %}">Download</a>
+          </div>
+          {% endif %}
+        </figure>
+        {% endfor %}
+        {% for photo in incident.photos.all %}
+        <figure class="social-post-media-slide" data-download-url="{% url 'incidents:photo' photo.pk %}" data-download-label="Download photo {{ forloop.counter }}">
+          <img class="social-post-media-asset" src="{% url 'incidents:photo_preview' photo.pk %}" alt="Photo {{ forloop.counter }}" loading="lazy">
+        </figure>
+        {% endfor %}
+      </div>
+      <div class="social-post-media-ui" hidden>
+        <button type="button" class="social-post-media-btn social-post-media-btn--prev" aria-label="Previous image"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+        <button type="button" class="social-post-media-btn social-post-media-btn--next" aria-label="Next image"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+        <div class="social-post-media-dots" role="tablist" aria-label="Evidence slides"></div>
+        <span class="social-post-media-counter" aria-live="polite"></span>
+      </div>
+      <div class="social-post-media-overlay social-post-media-overlay--type">
+        <span class="case-type-label case-type-label--{{ incident.case_type }}">{{ incident.get_case_type_display }}</span>
+      </div>
+      {% include "incidents/includes/post_info_popover.html" with info_class="social-post-info--media" %}
+      <div class="social-post-media-overlay social-post-media-overlay--routing" aria-label="Assignment">
+        <span class="social-post-overlay-pill"><i class="fa fa-building" aria-hidden="true"></i> {{ incident.authority|default:"Unassigned" }}</span>
+        {% if incident.assignee %}
+        <span class="social-post-overlay-pill"><i class="fa fa-user-check" aria-hidden="true"></i> {{ incident.assignee.get_display_name }}</span>
+        {% endif %}
+      </div>
+      <div class="social-post-media-overlay social-post-media-overlay--downloads">
+        <a class="social-post-media-download" data-carousel-download href="#" hidden title="Download" aria-label="Download current evidence"><i class="fa fa-download" aria-hidden="true"></i></a>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="social-post-body">
+      <h1 class="social-post-title" id="case-post-heading">{{ incident.title|default:"Untitled case" }}</h1>
+
+      <div class="social-post-caption" data-caption>
+        <p class="social-post-description">{{ incident.description }}</p>
+        <button type="button" class="social-post-see-more" aria-expanded="false" hidden>See more...</button>
+      </div>
+
+      {% if not incident.attachments.all and not incident.photos.all %}
+      <ul class="social-post-meta-list">
+        <li><i class="fa fa-building" aria-hidden="true"></i> {{ incident.authority|default:"Unassigned" }}</li>
+        {% if incident.assignee %}
+        <li class="social-post-meta-assignee">
+          <i class="fa fa-user-check" aria-hidden="true"></i>
+          {% include "includes/user_identity.html" with user=incident.assignee size="xs" show_email=False %}
+        </li>
+        {% endif %}
+      </ul>
+      {% endif %}
+
+      {% if incident.resolution_note %}
+      <div class="social-post-resolution">
+        <p class="social-post-resolution-label"><i class="fa fa-circle-check" aria-hidden="true"></i> Resolution</p>
+        <p class="social-post-resolution-text">{{ incident.resolution_note }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </article>
+    </div>
+
+    <div class="case-detail-activity-col{% if not activity_updates %} case-detail-activity-col--empty{% endif %}">
+  {% if activity_updates %}
+  <section class="social-thread card case-detail-panel" aria-labelledby="history-heading">
+    <h2 class="social-thread-heading" id="history-heading">Comments &amp; updates</h2>
+    <div class="case-detail-activity-scroll">
+    <ol class="social-thread-list">
+      {% for update in activity_updates %}
+      {% if update.comment or update.internal %}
+      <li class="social-comment">
+        <div class="social-comment-avatar">
+          {% if update.actor %}
+          <span class="user-identity-avatar user-identity-avatar--thread" aria-hidden="true">
+            {% if update.actor.avatar %}
+            <img src="{{ update.actor.avatar.url }}" alt="">
+            {% else %}
+            <span class="user-identity-initials">{{ update.actor.get_initials }}</span>
+            {% endif %}
+          </span>
+          {% else %}
+          <span class="user-identity-avatar user-identity-avatar--thread" aria-hidden="true">
+            <span class="user-identity-initials user-identity-initials-muted"><i class="fa fa-gears" aria-hidden="true"></i></span>
+          </span>
+          {% endif %}
+        </div>
+        <div class="social-comment-bubble">
+          <div class="social-comment-head">
+            {% if update.actor %}
+            <span class="social-comment-name">{{ update.actor.get_display_name }}</span>
+            {% else %}
+            <span class="social-comment-name">System</span>
+            {% endif %}
+            <time datetime="{{ update.created_at|date:'c' }}">{{ update.created_at|date:"d M Y, H:i" }}</time>
+            {% if update.internal %}
+            <span class="case-detail-event-internal">Internal</span>
+            {% endif %}
+          </div>
+          {% if update.changes %}
+          <div class="social-comment-changes">
+            {% include "incidents/includes/history_changes_inline.html" %}
+          </div>
+          {% endif %}
+          {% if update.comment %}
+          <p class="social-comment-text">{{ update.comment }}</p>
+          {% endif %}
+        </div>
+      </li>
+      {% else %}
+      <li class="social-activity-log">
+        <time datetime="{{ update.created_at|date:'c' }}">{{ update.created_at|date:"d M Y, H:i" }}</time>
+        <span class="social-activity-log-actor">{% if update.actor %}{{ update.actor.get_display_name }}{% else %}System{% endif %}</span>
+        {% if update.changes %}
+        <span class="social-activity-log-changes">
+          {% include "incidents/includes/history_changes_inline.html" %}
+        </span>
+        {% endif %}
+      </li>
+      {% endif %}
+      {% endfor %}
+    </ol>
+    </div>
+  </section>
+  {% else %}
+  <section class="social-thread card case-detail-panel case-detail-panel--empty" aria-label="Activity">
+    <h2 class="social-thread-heading">Comments &amp; updates</h2>
+    <p class="case-detail-empty">No comments or updates yet.</p>
+  </section>
+  {% endif %}
+    </div>
+  </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/case-detail.js' %}" defer></script>
 {% endblock %}

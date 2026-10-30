@@ -1,0 +1,33 @@
+{% if user %}
+<div class="user-identity user-identity--{{ size|default:'sm' }}{% if inline %} user-identity--inline{% endif %}">
+  <span class="user-identity-avatar" aria-hidden="true">
+    {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" alt="">
+    {% else %}
+    <span class="user-identity-initials">{{ user.get_initials }}</span>
+    {% endif %}
+  </span>
+  <span class="user-identity-text">
+    <span class="user-identity-name-line">
+      <span class="user-identity-name">{{ user.get_display_name }}</span>
+      {% if show_su_badge %}<span class="admin-user-flag" title="Django superuser">SU</span>{% elif show_off_badge %}<span class="admin-user-flag admin-user-flag-muted">Off</span>{% endif %}
+    </span>
+    {% if show_email|default:True %}
+      {% if user.email %}
+      <span class="user-identity-email">{{ user.email }}</span>
+      {% else %}
+      <span class="user-identity-email user-identity-email-muted">No email on file</span>
+      {% endif %}
+    {% endif %}
+  </span>
+</div>
+{% else %}
+<div class="user-identity user-identity--{{ size|default:'sm' }}{% if inline %} user-identity--inline{% endif %} user-identity--system">
+  <span class="user-identity-avatar" aria-hidden="true">
+    <span class="user-identity-initials user-identity-initials-muted"><i class="fa fa-gears" aria-hidden="true"></i></span>
+  </span>
+  <span class="user-identity-text">
+    <span class="user-identity-name">{{ label|default:"System" }}</span>
+  </span>
+</div>
+{% endif %}

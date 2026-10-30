@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 
 
 def permission_required(codename: str):
-    """Require logged-in user to hold an RBAC permission (superusers bypass)."""
+    """Require logged-in user to hold an RBAC permission via assigned roles."""
 
     def decorator(view_func):
         @wraps(view_func)
@@ -14,7 +14,7 @@ def permission_required(codename: str):
             user = request.user
             if not user.is_authenticated:
                 return redirect("accounts:login")
-            if user.is_superuser or user.has_rbac_permission(codename):
+            if user.has_rbac_permission(codename):
                 return view_func(request, *args, **kwargs)
             messages.error(
                 request,

@@ -1,0 +1,188 @@
+.case-update-page {
+  width: 100%;
+  max-width: none;
+}
+
+.case-update-intro {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.case-update-back {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--usj-maroon-dark);
+}
+
+.case-update-back:hover {
+  text-decoration: underline;
+}
+
+.case-update-ref {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #657080;
+}
+
+.case-update-card {
+  padding: 0.65rem 0.85rem 0.75rem;
+  border-top: 3px solid var(--usj-maroon);
+}
+
+.case-update-layout--solo {
+  grid-template-columns: 1fr;
+}
+
+.case-update-main {
+  min-width: 0;
+}
+
+.case-update-form .form-group {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.case-update-form label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #657080;
+  margin-bottom: 0.12rem;
+  line-height: 1.2;
+}
+
+.case-update-form .form-control-compact,
+.case-update-form select.form-control-compact {
+  font-size: 0.72rem;
+  min-height: 0;
+  height: 1.85rem;
+  padding: 0.2rem 0.45rem;
+  line-height: 1.25;
+}
+
+.case-update-form select.form-control-compact {
+  padding-right: 1.4rem;
+}
+
+.case-update-form textarea.form-control-compact {
+  height: auto;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.45rem;
+  resize: vertical;
+}
+
+.case-update-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.case-update-field--wide {
+  margin-bottom: 0.4rem;
+}
+
+.case-update-hint {
+  margin: 0.12rem 0 0;
+  font-size: 0.62rem;
+  color: #8a93a0;
+  line-height: 1.25;
+}
+
+.case-update-comment-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 0.75rem;
+  align-items: end;
+}
+
+.case-update-comment-block {
+  margin-bottom: 0;
+}
+
+.case-update-comment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.12rem;
+}
+
+.case-update-comment-head > label {
+  margin-bottom: 0;
+}
+
+.case-update-comment-type-wrap {
+  flex: 0 0 auto;
+  max-width: 9.5rem;
+}
+
+.case-update-form select.case-update-comment-type {
+  font-size: 0.68rem;
+  height: 1.65rem;
+  padding: 0.15rem 1.35rem 0.15rem 0.4rem;
+  font-weight: 600;
+}
+
+.case-update-comment-hint {
+  margin-bottom: 0.2rem;
+}
+
+.case-update-internal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  color: #566070;
+  margin-bottom: 0.35rem;
+  white-space: nowrap;
+}
+
+.case-update-internal input {
+  margin: 0;
+}
+
+.case-update-aside {
+  position: sticky;
+  top: 0.75rem;
+}
+
+.case-update-form .report-evidence {
+  min-height: 100%;
+}
+
+.case-update-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.55rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid #e8ebf0;
+}
+
+.case-update-form .errorlist {
+  font-size: 0.65rem;
+  margin: 0.15rem 0 0;
+}
+
+@media (max-width: 900px) {
+  .case-update-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .case-update-grid {
+    grid-template-columns: 1fr;
+  }
+  .case-update-comment-row {
+    grid-template-columns: 1fr;
+  }
+}

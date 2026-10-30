@@ -1,45 +1,76 @@
 {% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/admin-users.css' %}">{% endblock %}
+{% block page_header_class %}admin-users-compact-header{% endblock %}
 {% block content %}
-<div class="toolbar">
-  <a href="{% url 'portal:user_create' %}" class="btn btn-primary">New User</a>
-</div>
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>MC</th>
-        <th>CPM</th>
-        <th>Roles</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in users %}
-      <tr>
-        <td>{{ u.username }}{% if u.is_superuser %} <span class="badge badge-accent">SU</span>{% endif %}</td>
-        <td>{{ u.get_display_name }}</td>
-        <td>{{ u.email|default:"—" }}</td>
-        <td>{{ u.phone|default:"—" }}</td>
-        <td>{{ u.mc_number|default:"—" }}</td>
-        <td>{{ u.cpm_number|default:"—" }}</td>
-        <td>
-          {% for role in u.roles.all %}
-          <span class="badge">{{ role.name }}</span>
-          {% empty %}—{% endfor %}
-        </td>
-        <td class="actions">
-          <a href="{% url 'portal:user_edit' u.pk %}">Edit</a>
-          <a href="{% url 'portal:user_delete' u.pk %}" class="danger">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="8">No users yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="admin-users-page">
+  <section class="admin-users-intro" aria-label="User list actions">
+    <span class="scope-chip"><i class="fa fa-user-friends" aria-hidden="true"></i> Portal accounts</span>
+    <span class="admin-users-meta">{{ page_obj.paginator.count }} user{{ page_obj.paginator.count|pluralize }}</span>
+    <div class="admin-users-actions">
+      <a href="{% url 'portal:user_create' %}" class="btn btn-primary btn-sm"><i class="fa fa-plus" aria-hidden="true"></i> New user</a>
+    </div>
+  </section>
+
+  <section class="card admin-users-panel">
+    <div class="table-wrap">
+      <table class="data-table admin-users-table">
+        <thead>
+          <tr>
+            <th scope="col">User</th>
+            <th scope="col">Contact</th>
+            <th scope="col">Username</th>
+            <th scope="col">Roles</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in page_obj %}
+          <tr>
+            <td>
+              <div class="admin-user-cell">
+                {% if u.is_superuser %}
+                {% include "includes/user_identity.html" with user=u size="sm" show_su_badge=True %}
+                {% elif not u.is_active %}
+                {% include "includes/user_identity.html" with user=u size="sm" show_off_badge=True %}
+                {% else %}
+                {% include "includes/user_identity.html" with user=u size="sm" %}
+                {% endif %}
+              </div>
+            </td>
+            <td class="admin-user-contact">
+              {% if u.phone %}<span>{{ u.phone }}</span>{% else %}<span class="admin-users-muted">—</span>{% endif %}
+            </td>
+            <td class="admin-user-username">
+              <a class="admin-user-link" href="{% url 'portal:user_edit' u.pk %}">{{ u.username }}</a>
+              {% if u.mc_number or u.cpm_number %}
+              <span class="admin-user-sub">{% if u.mc_number %}{{ u.mc_number }}{% endif %}{% if u.mc_number and u.cpm_number %} · {% endif %}{% if u.cpm_number %}{{ u.cpm_number }}{% endif %}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="admin-role-chips">
+                {% for role in u.roles.all %}
+                <span class="profile-chip profile-chip-muted">{{ role.name }}</span>
+                {% empty %}<span class="admin-users-muted">—</span>{% endfor %}
+              </div>
+            </td>
+            <td class="actions admin-user-row-actions">
+              {% url 'portal:user_edit' u.pk as edit_url %}
+              {% if u != request.user %}
+              {% url 'portal:user_delete' u.pk as delete_url %}
+              {% include "includes/list_row_actions.html" with edit_url=edit_url delete_url=delete_url %}
+              {% else %}
+              {% include "includes/list_row_actions.html" with edit_url=edit_url %}
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="admin-users-empty">No users yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "includes/list_pagination.html" %}
+  </section>
 </div>
 {% endblock %}

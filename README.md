@@ -53,6 +53,6 @@ If you see **Application failed to respond** while Gunicorn logs look fine:
 
 ## Default data
 
-`python manage.py seed_rbac` creates dashboard/report permissions, a **Member** end-user role (auto-assigned on registration), and sample staff roles (**Security**, **IT Support**, **Student Affairs**) used by Gemini routing. Mark any role as **End-user role** in the super admin UI to exclude it from AI alerts.
+`python manage.py seed_rbac` syncs permissions, four authorities (**Developers**, **IT Department**, **Maintenance and cleaning**, **Security**) with unit roles (**System Administrator**, **Department Head**, **Cleaning Head**, **Admin Security Officer**), end-user roles **Student** and **Lecturer** (own cases + profile), categories, and bootstrap admin **Lakindu** (`induwaralakindu09@gmail.com`). Change that password after first login in production.
 
 Superusers manage **roles** and **users** in the app UI. Permission codenames and sidebar menu items are defined in `rbac/features.py` and synced on deploy via `seed_rbac`.

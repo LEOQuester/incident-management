@@ -1,0 +1,59 @@
+.admin-perm-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin-bottom: 0.45rem;
+  width: 100%;
+}
+
+.admin-perm-search {
+  display: flex;
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 20rem;
+}
+
+.admin-perm-search .form-control {
+  padding: 0.28rem 0.45rem;
+  font-size: 0.8125rem;
+  width: 100%;
+}
+
+.admin-perm-name {
+  font-weight: 700;
+  color: var(--usj-navy);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.admin-perm-code {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.65rem;
+  color: #657080;
+  margin-top: 0.12rem;
+  word-break: break-all;
+}
+
+.admin-perm-area {
+  font-size: 0.72rem;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.admin-permissions-table .badge {
+  font-size: 0.62rem;
+  padding: 0.08rem 0.35rem;
+}
+
+.admin-perm-lead {
+  font-size: 0.72rem;
+  color: #657080;
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.admin-perm-lead a {
+  font-weight: 600;
+}

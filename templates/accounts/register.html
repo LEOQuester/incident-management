@@ -1,4 +1,5 @@
 {% extends "base_auth.html" %}
+{% load static %}
 {% block title %}Register{% endblock %}
 {% block auth_panel_class %}auth-panel auth-panel-register{% endblock %}
 {% block content %}
@@ -10,22 +11,28 @@
   {% endif %}
 
   <div class="register-form-grid">
-    <div class="register-form-full form-group">{{ form.user_type.label_tag }}{{ form.user_type }}{{ form.user_type.errors }}{{ form.department.label_tag }}{{ form.department }}{{ form.department.errors }}<p>MC and CPM numbers are required for students; optional for lecturers.</p></div>
     <div class="register-form-col">
       <div class="form-group{% if form.username.errors %} has-error{% endif %}">
         <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
         {{ form.username }}
         {{ form.username.errors }}
       </div>
-      <div class="form-group{% if form.first_name.errors %} has-error{% endif %}">
-        <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-        {{ form.first_name }}
-        {{ form.first_name.errors }}
+      <div class="register-form-row register-form-row--split">
+        <div class="form-group{% if form.first_name.errors %} has-error{% endif %}">
+          <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {{ form.first_name.errors }}
+        </div>
+        <div class="form-group{% if form.last_name.errors %} has-error{% endif %}">
+          <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {{ form.last_name.errors }}
+        </div>
       </div>
-      <div class="form-group{% if form.last_name.errors %} has-error{% endif %}">
-        <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-        {{ form.last_name }}
-        {{ form.last_name.errors }}
+      <div class="form-group{% if form.department.errors %} has-error{% endif %}">
+        <label for="{{ form.department.id_for_label }}">{{ form.department.label }}</label>
+        {{ form.department }}
+        {{ form.department.errors }}
       </div>
       <div class="form-group{% if form.email.errors %} has-error{% endif %}">
         <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
@@ -34,7 +41,9 @@
       </div>
       <div class="form-group{% if form.phone.errors %} has-error{% endif %}">
         <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
-        {{ form.phone }}
+        <div class="phone-input-wrap">
+          {{ form.phone }}
+        </div>
         {{ form.phone.errors }}
       </div>
     </div>
@@ -50,10 +59,17 @@
         {{ form.cpm_number }}
         {{ form.cpm_number.errors }}
       </div>
+      <p class="register-form-hint">MC and CPM numbers are required for self-registration.</p>
       <div class="form-group{% if form.password1.errors %} has-error{% endif %}">
         <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
-        {{ form.password1 }}
-        {% if form.password1.help_text %}<small class="help-text">{{ form.password1.help_text }}</small>{% endif %}
+        <div class="register-password-wrap">
+          {{ form.password1 }}
+          {% if form.password_requirements %}
+          <div class="register-password-tooltip" id="register-password-tooltip" role="tooltip" hidden>
+            {{ form.password_requirements }}
+          </div>
+          {% endif %}
+        </div>
         {{ form.password1.errors }}
       </div>
       <div class="form-group{% if form.password2.errors %} has-error{% endif %}">
@@ -71,9 +87,5 @@
 <p class="auth-footer">Already registered? <a href="{% url 'accounts:login' %}">Login</a></p>
 {% endblock %}
 {% block extra_js %}
-<script>
-document.getElementById('register-form')?.addEventListener('submit', function () {
-  window.fmscSyncPhoneInputs(this);
-});
-</script>
+<script src="{% static 'js/register-form.js' %}" defer></script>
 {% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base_app.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/catalog.css' %}">{% endblock %}
+{% block page_header_class %}catalog-compact-header{% endblock %}
+{% block content %}
+<div class="catalog-page">
+  <section class="catalog-intro" aria-label="Catalog actions">
+    <span class="scope-chip">
+      <i class="fa {% if kind == 'authorities' %}fa-building{% else %}fa-tags{% endif %}" aria-hidden="true"></i>
+      {% if kind == 'authorities' %}Authorities{% else %}Report categories{% endif %}
+    </span>
+    <span class="catalog-meta">{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }}</span>
+    <div class="catalog-actions">
+      <a href="{% url 'incidents:catalog_create' kind %}" class="btn btn-primary btn-sm">
+        <i class="fa fa-plus" aria-hidden="true"></i> New
+      </a>
+    </div>
+  </section>
+
+  <section class="card catalog-panel">
+    <div class="table-wrap">
+      <table class="data-table catalog-table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            {% if kind == 'authorities' %}{% endif %}
+            <th scope="col">Status</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in page_obj %}
+          <tr>
+            <td>
+              {{ item.name }}
+            </td>
+            {% if kind == 'authorities' %}{% endif %}
+            <td>
+              {% if item.is_active %}
+              <span class="status-pill status-submitted">Active</span>
+              {% else %}
+              <span class="status-pill status-routing_failed">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="actions catalog-row-actions">
+              {% url 'incidents:catalog_edit' kind item.pk as edit_url %}
+              {% url 'incidents:catalog_delete' kind item.pk as delete_url %}
+              {% include "includes/list_row_actions.html" with edit_url=edit_url delete_url=delete_url %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{% if kind == 'authorities' %}3{% else %}3{% endif %}" class="catalog-empty">No records yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "includes/list_pagination.html" %}
+  </section>
+</div>
+{% endblock %}

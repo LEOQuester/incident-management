@@ -1,11 +1,100 @@
 {% extends "base_app.html" %}
+{% block page_header_class %}page-header-compact{% endblock %}
+{% block page_title %}{% if edit_mode %}Edit submission{% else %}Submit feedback{% endif %}{% endblock %}
 {% block content %}
-<form method="post" enctype="multipart/form-data" class="card form-card">
-{% csrf_token %}{{ form.as_p }}
-<p><label>Evidence: up to five files. Images up to 5 MiB; MP4/WebM videos up to 25 MiB and 120 seconds each by default.
-<input type="file" name="evidence" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"></label></p>
-<button type="submit" class="btn btn-primary">Submit case</button>
-<a href="{% url 'portal:dashboard' %}">Cancel</a>
-</form>
+<div
+  class="report-shell report-mode-complaint"
+  id="report-shell"
+>
+  <form
+    method="post"
+    enctype="multipart/form-data"
+    class="report-form card"
+    id="report-form"
+    novalidate
+  >
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-error" role="alert">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="report-layout">
+      <div class="report-main">
+        <div class="report-field report-field-full">
+          <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+          {{ form.title }}
+          {{ form.title.errors }}
+        </div>
+
+        <div class="report-row-meta">
+          <div class="report-field">
+            <label for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+            {{ form.category }}
+            {{ form.category.errors }}
+          </div>
+          <div class="report-field">
+            <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+            {{ form.location }}
+            {{ form.location.errors }}
+          </div>
+          <div class="report-field report-field-type">
+            <span class="report-field-type-label">Type</span>
+            {{ form.case_type }}
+            {{ form.case_type.errors }}
+            <div class="case-type-switch" id="case-type-switch">
+              <span class="case-type-side case-type-complaint is-active" data-side="complaint">Complaint</span>
+              <button
+                type="button"
+                class="case-type-track"
+                id="case-type-track"
+                role="switch"
+                aria-checked="false"
+                aria-label="Toggle suggestion or complaint"
+              >
+                <span class="case-type-thumb"></span>
+              </button>
+              <span class="case-type-side case-type-suggestion" data-side="suggestion">Suggestion</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-field report-field-full">
+          <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+          {{ form.description }}
+          {{ form.description.errors }}
+        </div>
+      </div>
+
+      <div class="report-aside">
+        {% include "incidents/includes/evidence_upload.html" with incident=incident %}
+      </div>
+    </div>
+
+    <div class="report-footer">
+      <label class="report-check report-check-urgent">
+        {{ form.is_urgent }}
+        <span>{{ form.is_urgent.label }}</span>
+      </label>
+      {{ form.is_urgent.errors }}
+      <p class="report-submit-note">
+        {% if edit_mode %}
+        Save updates to your case. Staff workflow fields (status, assignment) are unchanged.
+        {% else %}
+        By submitting, I confirm this information is accurate to the best of my knowledge.
+        {% endif %}
+      </p>
+      <div class="report-actions">
+        {% if edit_mode and cancel_url %}
+        <a class="btn btn-secondary" href="{{ cancel_url }}">Cancel</a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-report-submit">{% if edit_mode %}Save changes{% else %}Submit{% endif %}</button>
+      </div>
+    </div>
+  </form>
+</div>
 {% endblock %}
-{% block extra_js %}{% load static %}<script src="{% static 'js/evidence-upload.js' %}"></script>{% endblock %}
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/evidence-upload.js' %}"></script>
+<script src="{% static 'js/report-form.js' %}"></script>
+{% endblock %}

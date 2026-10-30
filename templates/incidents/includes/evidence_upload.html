@@ -1,0 +1,30 @@
+<div
+  class="report-evidence evidence-upload-block"
+  id="evidence-upload"
+  data-max-evidence="{{ max_evidence }}"
+  data-max-mb="{{ evidence_max_mb }}"
+>
+  <div class="report-evidence-head">
+    <span class="report-evidence-title">Evidence <span class="report-evidence-optional">(optional)</span></span>
+    <span class="report-evidence-count" id="evidence-count" aria-live="polite">{% if existing_evidence_previews %}{{ existing_evidence_previews|length }} / {{ max_evidence }}{% else %}0 / {{ max_evidence }}{% endif %}</span>
+  </div>
+  <p class="report-evidence-hint report-evidence-limit">
+    Max <strong>{{ evidence_max_mb }} MB</strong> per file · up to {{ max_evidence }} files (JPEG, PNG, WebP, GIF, MP4/WebM).
+  </p>
+  <p class="report-evidence-hint report-evidence-drive">
+    Video over {{ evidence_max_mb }} MB? Upload to Google Drive and paste the share link in <strong>Description</strong>.
+  </p>
+  {% if existing_evidence_previews %}
+  {{ existing_evidence_previews|json_script:"evidence-existing-data" }}
+  {% endif %}
+  <div class="evidence-slots" id="evidence-slots"></div>
+  <input
+    type="file"
+    name="evidence"
+    id="evidence-input"
+    class="visually-hidden"
+    multiple
+    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+  >
+  <p class="report-evidence-status" id="evidence-status" aria-live="polite"></p>
+</div>
